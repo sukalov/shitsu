@@ -69,14 +69,14 @@ const products: Product[] = [
     id: "2",
     name: "Полуночный сад",
     price: 12000,
-    category: "originals",
+    category: "originals", // originals or merch
     images: ["https://images.unsplash.com/photo-1549887534-1541e9326642?w=800"],
     description:
       "Ночной пейзаж с элементами сюрреализма. Тайный мир, открывающийся только в темноте, полный мистики и неожиданных открытий.",
-    isSold: false,
-    year: "2024",
-    medium: "Масло на холсте",
-    size: "30 × 40 см",
+    isSold: false, // true or false
+    year: "2024", // delete
+    medium: "Масло на холсте", // delete
+    size: "30 × 40 см", // delete
   },
   {
     id: "3",
@@ -543,33 +543,37 @@ function CartSidebar() {
                         {item.price.toLocaleString("ru-RU")} ₽
                       </p>
                       <div className="flex items-center gap-3">
-                        <button
+                        <Button
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1)
                           }
-                          className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:border-neutral-900 transition-colors"
+                          variant="square"
+                          size="icon-sm"
                         >
                           <Minus className="w-3 h-3" />
-                        </button>
+                        </Button>
                         <span className="text-sm w-8 text-center">
                           {item.quantity}
                         </span>
-                        <button
+                        <Button
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }
-                          className="w-8 h-8 flex items-center justify-center border border-neutral-300 hover:border-neutral-900 transition-colors"
+                          variant="square"
+                          size="icon-sm"
                         >
                           <Plus className="w-3 h-3" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
-                    <button
+                    <Button
                       onClick={() => removeItem(item.id)}
-                      className="p-1 text-neutral-300 hover:text-neutral-900 transition-colors self-start"
+                      variant="ghost"
+                      size="icon-xs"
+                      className="text-neutral-300 hover:text-neutral-900 self-start"
                     >
                       <X className="w-4 h-4" weight="light" />
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>

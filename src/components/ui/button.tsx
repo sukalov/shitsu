@@ -14,6 +14,10 @@ const buttonVariants = cva(
         secondary: "bg-neutral-100 text-neutral-900 hover:bg-neutral-200",
         ghost: "hover:bg-neutral-100 hover:text-neutral-900 border-transparent",
         link: "text-neutral-900 underline-offset-4 hover:underline border-transparent",
+        square:
+          "border-neutral-300 bg-transparent hover:border-neutral-900 rounded-none",
+        "square-primary":
+          "border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 rounded-none",
       },
       size: {
         default:
@@ -23,7 +27,7 @@ const buttonVariants = cva(
         lg: "h-10 gap-1.5 px-6 has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4",
         icon: "size-9",
         "icon-xs": "size-7 [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8",
+        "icon-sm": "size-8 [&_svg:not([class*='size-'])]:size-3",
         "icon-lg": "size-10",
       },
     },
