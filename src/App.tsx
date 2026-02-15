@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState, createContext, useContext, useEffect, useRef } from "react";
 import { Routes, Route, Link, useLocation, useParams } from "react-router";
 import {
   ShoppingBag,
@@ -10,7 +10,6 @@ import {
   TelegramLogo,
   Plus,
   Minus,
-  ArrowRight,
   Check,
   Envelope,
   Package,
@@ -19,13 +18,62 @@ import {
   Sparkle,
   PaintBrush,
   Heart,
+  MapPin,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+
+function HeaderImage({
+  src,
+  alt,
+  className,
+  style,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={style}
+      onError={(e) => {
+        const target = e.currentTarget;
+        target.style.display = "none";
+        target.nextElementSibling?.classList.remove("hidden");
+      }}
+    />
+  );
+}
+
+// Utility function to create Telegram link with form data
+function createTelegramLink(
+  data: Record<string, string | number | undefined>,
+): string {
+  const lines = Object.entries(data)
+    .filter(([_, value]) => value !== undefined && value !== "")
+    .map(([key, value]) => {
+      const cleanValue = String(value).trim().replace(/[<>]/g, "");
+      return key ? `${key}: ${cleanValue}` : cleanValue;
+    });
+
+  const text = lines.join("\n");
+  const encodedText = encodeURIComponent(text);
+  return `https://t.me/shitsu_zakaz?text=${encodedText}`;
+}
 
 // Types
 interface Product {
@@ -37,10 +85,7 @@ interface Product {
   images: string[];
   description: string;
   isSold: boolean;
-  series?: string;
-  year?: string;
-  medium?: string;
-  size?: string;
+  seriesId?: string;
 }
 
 interface CartItem extends Product {
@@ -57,13 +102,12 @@ const products: Product[] = [
     images: [
       "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800",
       "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800",
+      "https://images.unsplash.com/photo-1549887534-1541e9326642?w=800",
+      "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800",
     ],
     description:
-      "Абстрактная композиция, исследующая тему времени и трансформации. Работа погружает зрителя в медитативное состояние, приглашая к созерцанию мимолётности момента.",
+      "Абстрактная композиция, исследующая тему времени и трансформации. Работа погружает зрителя в медитативное состояние, приглашая к созерцанию мимолётности момента. Создана в 2024 году. Акрил на холсте, 40 × 50 см.",
     isSold: false,
-    year: "2024",
-    medium: "Акрил на холсте",
-    size: "40 × 50 см",
   },
   {
     id: "2",
@@ -72,11 +116,8 @@ const products: Product[] = [
     category: "originals", // originals or merch
     images: ["https://images.unsplash.com/photo-1549887534-1541e9326642?w=800"],
     description:
-      "Ночной пейзаж с элементами сюрреализма. Тайный мир, открывающийся только в темноте, полный мистики и неожиданных открытий.",
-    isSold: false, // true or false
-    year: "2024", // delete
-    medium: "Масло на холсте", // delete
-    size: "30 × 40 см", // delete
+      "Ночной пейзаж с элементами сюрреализма. Тайный мир, открывающийся только в темноте, полный мистики и неожиданных открытий. Создан в 2024 году. Масло на холсте, 30 × 40 см.",
+    isSold: false,
   },
   {
     id: "3",
@@ -85,11 +126,8 @@ const products: Product[] = [
     category: "originals",
     images: ["https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800"],
     description:
-      "Исследование противопоставления структуры и хаоса. В каждом беспорядке скрыта гармония, ожидающая своего открытия.",
+      "Исследование противопоставления структуры и хаоса. В каждом беспорядке скрыта гармония, ожидающая своего открытия. Создан в 2023 году. Смешанная техника, 50 × 60 см.",
     isSold: false,
-    year: "2023",
-    medium: "Смешанная техника",
-    size: "50 × 60 см",
   },
   {
     id: "4",
@@ -99,14 +137,13 @@ const products: Product[] = [
     subcategory: "Принты",
     images: [
       "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800",
+      "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800",
+      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
     ],
     description:
-      "Цифровой принт на бумаге премиум качества. Каждый принт подписан автором и имеет сертификат подлинности.",
+      "Цифровой принт на бумаге премиум качества. Каждый принт подписан автором и имеет сертификат подлинности. Создан в 2024 году. Размер 30 × 40 см.",
     isSold: false,
-    series: "Космическая серия",
-    year: "2024",
-    medium: "Цифровой принт",
-    size: "30 × 40 см",
+    seriesId: "sticker-pack-series",
   },
   {
     id: "5",
@@ -116,14 +153,44 @@ const products: Product[] = [
     subcategory: "Принты",
     images: [
       "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800",
+      "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800",
+      "https://images.unsplash.com/photo-1614730341194-75c607400070?w=800",
     ],
     description:
-      "Лимитированная серия из 50 экземпляров. Момент величественного космического явления, застывший навсегда.",
+      "Лимитированная серия из 50 экземпляров. Момент величественного космического явления, застывший навсегда. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
     isSold: false,
-    series: "Космическая серия",
-    year: "2024",
-    medium: "Цифровой принт",
-    size: "30 × 40 см",
+    seriesId: "cosmic-series",
+  },
+  {
+    id: "5a",
+    name: "Солнечное затмение",
+    price: 2800,
+    category: "merch",
+    subcategory: "Принты",
+    images: [
+      "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=800",
+      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
+      "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=800",
+    ],
+    description:
+      "Дополнение к космической серии. Изображение солнечного затмения с уникальными деталями. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
+    isSold: false,
+    seriesId: "cosmic-series",
+  },
+  {
+    id: "5b",
+    name: "Звездный путь",
+    price: 2200,
+    category: "merch",
+    subcategory: "Принты",
+    images: [
+      "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800",
+      "https://images.unsplash.com/photo-1465101162946-4377e57745c3?w=800",
+    ],
+    description:
+      "Абстрактное изображение звездного пути. Часть космической коллекции. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
+    isSold: false,
+    seriesId: "cosmic-series",
   },
   {
     id: "6",
@@ -132,11 +199,8 @@ const products: Product[] = [
     category: "archive",
     images: ["https://images.unsplash.com/photo-1549490349-8643362247b5?w=800"],
     description:
-      "Диптих о внутреннем и внешнем мире. Работа нашла свой дом в частной коллекции.",
+      "Диптих о внутреннем и внешнем мире. Работа нашла свой дом в частной коллекции. Создан в 2023 году. Масло на холсте, 60 × 80 см.",
     isSold: true,
-    year: "2023",
-    medium: "Масло на холсте",
-    size: "60 × 80 см",
   },
   {
     id: "7",
@@ -146,13 +210,12 @@ const products: Product[] = [
     subcategory: "Одежда",
     images: [
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
+      "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=800",
+      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800",
     ],
     description:
-      "100% органический хлопок. Уникальный принт, созданный вручную. Каждая футболка — как миниатюрная галерея.",
+      "100% органический хлопок. Уникальный принт, созданный вручную. Каждая футболка — как миниатюрная галерея. Доступны размеры: S, M, L, XL.",
     isSold: false,
-    year: "2024",
-    medium: "Органический хлопок",
-    size: "S, M, L, XL",
   },
   {
     id: "8",
@@ -162,13 +225,21 @@ const products: Product[] = [
     subcategory: "Аксессуары",
     images: ["https://images.unsplash.com/photo-1544816155-12df9643f363?w=800"],
     description:
-      "А5, 48 листов премиум бумаги. Дизайнерская обложка с иллюстрацией. Идеальна для записей и зарисовок.",
+      "А5, 48 листов премиум бумаги. Дизайнерская обложка с иллюстрацией. Идеальна для записей и зарисовок. Создана в 2024 году.",
     isSold: false,
-    year: "2024",
-    medium: "Бумага премиум класса",
-    size: "А5",
   },
 ];
+
+// ScrollToTop component - scrolls to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 // Cart Context
 interface CartContextType {
@@ -261,7 +332,7 @@ function Navigation() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -288,10 +359,11 @@ function Navigation() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="relative group">
-              <span className="text-2xl lg:text-3xl tracking-[0.15em] font-bold text-neutral-900">
-                SHITSU
-              </span>
-              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-neutral-900 transition-all duration-500 group-hover:w-full" />
+              <img
+                src="/logo.png"
+                alt="SHITSU"
+                className="h-8 lg:h-10 w-auto object-contain"
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -314,8 +386,11 @@ function Navigation() {
 
             {/* Actions */}
             <div className="flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsOpen(true)}
+                aria-label="Открыть корзину"
                 className="relative p-2 text-neutral-900 hover:text-neutral-600 transition-colors"
               >
                 <ShoppingBag className="w-5 h-5" weight="light" />
@@ -324,10 +399,13 @@ function Navigation() {
                     {items.length}
                   </span>
                 )}
-              </button>
+              </Button>
 
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
                 className="lg:hidden p-2 text-neutral-900"
               >
                 {isMenuOpen ? (
@@ -335,7 +413,7 @@ function Navigation() {
                 ) : (
                   <List className="w-6 h-6" weight="light" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </nav>
@@ -376,7 +454,6 @@ function CartSidebar() {
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState("post");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
 
   const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
@@ -384,32 +461,25 @@ function CartSidebar() {
   };
 
   return (
-    <>
-      {/* Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-neutral-900/20 backdrop-blur-sm z-50"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div
-        className={cn(
-          "fixed top-0 right-0 h-full w-full max-w-lg bg-white z-50 shadow-2xl transform transition-transform duration-500 ease-out flex flex-col",
-          isOpen ? "translate-x-0" : "translate-x-full",
-        )}
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetContent
+        side="right"
+        className="w-full max-w-lg bg-white p-0"
+        showCloseButton={false}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-neutral-200">
-          <h2 className="text-xl tracking-wide">Ваша корзина</h2>
-          <button
+        <SheetHeader className="flex flex-row items-center justify-between p-8 border-b border-neutral-200">
+          <SheetTitle className="text-xs tracking-[0.15em] uppercase font-normal">
+            Ваша корзина
+          </SheetTitle>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-neutral-100 transition-colors"
+            className="text-neutral-500 hover:text-neutral-900"
           >
             <X className="w-5 h-5" weight="light" />
-          </button>
-        </div>
+          </Button>
+        </SheetHeader>
 
         {/* Content */}
         <div className="flex-1 overflow-auto">
@@ -435,7 +505,9 @@ function CartSidebar() {
               <div className="w-16 h-16 border border-neutral-900 flex items-center justify-center mb-6">
                 <Check className="w-8 h-8" weight="light" />
               </div>
-              <h3 className="text-2xl mb-3">Заявка отправлена</h3>
+              <h3 className="text-xs uppercase tracking-[0.15em] mb-3">
+                Заявка отправлена
+              </h3>
               <p className="text-neutral-500 max-w-xs">
                 С вами свяжутся в ближайшее время для подтверждения заказа
               </p>
@@ -443,8 +515,14 @@ function CartSidebar() {
           ) : isCheckingOut ? (
             <form onSubmit={handleCheckout} className="p-8 space-y-8">
               <div className="space-y-4">
-                <h3 className="text-lg">Способ доставки</h3>
-                <div className="space-y-3">
+                <h3 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
+                  Способ доставки
+                </h3>
+                <RadioGroup
+                  value={deliveryMethod}
+                  onValueChange={setDeliveryMethod}
+                  className="space-y-3"
+                >
                   {[
                     { id: "post", label: "Почта России" },
                     { id: "cdek", label: "СДЭК" },
@@ -452,6 +530,7 @@ function CartSidebar() {
                   ].map((method) => (
                     <label
                       key={method.id}
+                      htmlFor={method.id}
                       className={cn(
                         "flex items-center gap-4 p-4 border cursor-pointer transition-all duration-300",
                         deliveryMethod === method.id
@@ -459,24 +538,26 @@ function CartSidebar() {
                           : "border-neutral-200 hover:border-neutral-400",
                       )}
                     >
-                      <input
-                        type="radio"
-                        name="delivery"
+                      <RadioGroupItem
                         value={method.id}
-                        checked={deliveryMethod === method.id}
-                        onChange={(e) => setDeliveryMethod(e.target.value)}
-                        className="w-4 h-4 accent-neutral-900"
+                        id={method.id}
+                        className="border-neutral-400 data-[state=checked]:border-neutral-900 data-[state=checked]:bg-neutral-900 pointer-events-none"
                       />
                       <span className="text-sm tracking-wide">
                         {method.label}
                       </span>
                     </label>
                   ))}
-                </div>
+                </RadioGroup>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="address">Адрес доставки</Label>
+                <Label
+                  htmlFor="address"
+                  className="text-xs uppercase tracking-[0.15em] text-neutral-500"
+                >
+                  Адрес доставки
+                </Label>
                 <Input
                   id="address"
                   value={address}
@@ -487,40 +568,74 @@ function CartSidebar() {
                 />
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="phone">Контактный телефон</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+7 (___) ___-__-__"
-                  required
-                  className="rounded-none border-neutral-300 focus:border-neutral-900"
-                />
-              </div>
-
               <div className="border-t border-neutral-200 pt-6 space-y-3">
                 <div className="flex justify-between text-sm text-neutral-500">
-                  <span>Товары ({items.length})</span>
-                  <span>{total.toLocaleString("ru-RU")} ₽</span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    Товары ({items.length})
+                  </span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    {total.toLocaleString("ru-RU")} ₽
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm text-neutral-500">
-                  <span>Доставка</span>
-                  <span>Рассчитается</span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    Доставка
+                  </span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    Рассчитается
+                  </span>
                 </div>
                 <div className="flex justify-between text-xl pt-3 border-t border-neutral-200">
-                  <span>Итого</span>
-                  <span>{total.toLocaleString("ru-RU")} ₽</span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    Итого
+                  </span>
+                  <span className="text-xs uppercase tracking-[0.1em]">
+                    {total.toLocaleString("ru-RU")} ₽
+                  </span>
                 </div>
               </div>
-
-              <Button type="submit" className="w-full" size="lg">
-                Отправить заявку
-              </Button>
-              <p className="text-xs text-neutral-400 text-center">
-                Заявка будет отправлена в Telegram @shitsu_zakaz
-              </p>
+              <div className="space-y-2">
+                {address.trim() ? (
+                  <a
+                    href={createTelegramLink({
+                      "":
+                        "ЗАКАЗ\n\n" +
+                        items
+                          .map(
+                            (item) =>
+                              `${item.name} (${item.quantity} шт.) - ${(item.price * item.quantity).toLocaleString("ru-RU")} ₽`,
+                          )
+                          .join("\n"),
+                      Доставка:
+                        deliveryMethod === "post"
+                          ? "Почта России"
+                          : deliveryMethod === "cdek"
+                            ? "СДЭК"
+                            : "OZON",
+                      Адрес: address,
+                      Итого: `${total.toLocaleString("ru-RU")} ₽`,
+                    })}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-primary text-primary-foreground hover:bg-primary/80 uppercase tracking-[0.1em] text-sm font-medium transition-all"
+                  >
+                    <TelegramLogo className="w-4 h-4" />
+                    Отправить
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-neutral-300 text-neutral-500 uppercase tracking-[0.1em] text-sm font-medium cursor-not-allowed"
+                  >
+                    <TelegramLogo className="w-4 h-4" />
+                    Отправить
+                  </button>
+                )}
+                <p className="text-xs text-neutral-400 text-center">
+                  Для отправки вы будете перенаправлены в телеграм
+                </p>
+              </div>
             </form>
           ) : (
             <div className="p-8">
@@ -538,7 +653,9 @@ function CartSidebar() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-lg mb-1">{item.name}</h4>
+                      <h4 className="text-xs uppercase tracking-[0.1em] mb-1">
+                        {item.name}
+                      </h4>
                       <p className="text-sm text-neutral-500 mb-3">
                         {item.price.toLocaleString("ru-RU")} ₽
                       </p>
@@ -547,8 +664,9 @@ function CartSidebar() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1)
                           }
-                          variant="square"
+                          variant="outline"
                           size="icon-sm"
+                          className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
                         >
                           <Minus className="w-3 h-3" />
                         </Button>
@@ -559,8 +677,9 @@ function CartSidebar() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }
-                          variant="square"
+                          variant="outline"
                           size="icon-sm"
+                          className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -583,14 +702,16 @@ function CartSidebar() {
 
         {/* Footer */}
         {items.length > 0 && !orderSubmitted && !isCheckingOut && (
-          <div className="border-t border-neutral-200 p-8 space-y-6">
+          <div className="border-t border-neutral-200 p-8 space-y-4">
             <div className="flex justify-between text-2xl">
-              <span>Итого</span>
-              <span>{total.toLocaleString("ru-RU")} ₽</span>
+              <span className="text-xs uppercase tracking-[0.15em]">Итого</span>
+              <span className="text-xs uppercase tracking-[0.15em]">
+                {total.toLocaleString("ru-RU")} ₽
+              </span>
             </div>
             <Button
               onClick={() => setIsCheckingOut(true)}
-              className="w-full"
+              className="w-full uppercase tracking-[0.1em]"
               size="lg"
             >
               Оформить заказ
@@ -600,183 +721,41 @@ function CartSidebar() {
             </p>
           </div>
         )}
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 }
 
 // Home Page
 function HomePage() {
-  const featuredProducts = products.filter((p) => !p.isSold).slice(0, 4);
+  // Combine originals and merch, exclude sold items
+  const collectionProducts = products.filter(
+    (p) => (p.category === "originals" || p.category === "merch") && !p.isSold,
+  );
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1549887534-1541e9326642?w=1600"
-            alt="Hero"
-            className="w-full h-full object-cover opacity-30"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-transparent" />
-        </div>
-
-        <div className="relative z-10 max-w-[1600px] mx-auto px-6 lg:px-12 py-32">
-          <div className="max-w-2xl">
-            <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-6 animate-fade-in-up">
-              Кира — художница
-            </p>
-            <h1 className="text-6xl lg:text-8xl text-neutral-900 mb-8 leading-[0.9] tracking-tight animate-fade-in-up delay-100">
-              SHITSU
-            </h1>
-            <p className="text-lg text-neutral-600 mb-10 max-w-md leading-relaxed animate-fade-in-up delay-200">
-              Оригинальные работы и принты, созданные с любовью к деталям.
-              Каждое произведение — это история, ожидающая своего места в вашем
-              пространстве.
-            </p>
-            <div className="flex gap-4 animate-fade-in-up delay-300">
-              <Link to="/originals">
-                <Button size="lg" className="rounded-full px-8">
-                  Смотреть коллекцию
-                </Button>
-              </Link>
-              <Link to="/about">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full px-8"
-                >
-                  Обо мне
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-neutral-400">
-          <span className="text-[10px] tracking-[0.3em] uppercase">
-            Листайте
-          </span>
-          <div className="w-[1px] h-12 bg-neutral-300 animate-pulse" />
-        </div>
-      </section>
-
-      {/* Featured Works */}
+      {/* Collection Section */}
       <section className="py-32 px-6 lg:px-12 bg-neutral-50">
         <div className="max-w-[1600px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-end mb-20">
-            <div className="lg:col-span-8">
-              <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-                Избранное
-              </p>
-              <h2 className="text-4xl lg:text-5xl text-neutral-900">
-                Новые работы
-              </h2>
-            </div>
-            <div className="lg:col-span-4 lg:text-right">
-              <Link
-                to="/originals"
-                className="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase text-neutral-500 hover:text-neutral-900 transition-colors elegant-underline"
-              >
-                Смотреть все работы
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product, idx) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
+            {collectionProducts.map((product, idx) => (
               <div
                 key={product.id}
-                className={cn(
-                  "group",
-                  idx === 0 && "lg:col-span-2 lg:row-span-2",
-                )}
+                className={cn(idx % 5 === 0 && "lg:col-span-2 lg:row-span-2")}
               >
-                <ProductCard product={product} featured={idx === 0} />
+                <ProductCard product={product} featured={idx % 5 === 0} />
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Statement */}
-      <section className="py-32 px-6 lg:px-12 bg-white">
-        <div className="max-w-[1200px] mx-auto text-center">
-          <p className="text-3xl lg:text-5xl text-neutral-900 leading-relaxed mb-8">
-            «Искусство — это не то, что вы видите,
-            <br />
-            <span className="text-neutral-400">
-              а то, что вы заставляете других увидеть»
-            </span>
-          </p>
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500">
-            — Эдгар Дега
-          </p>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-32 px-6 lg:px-12 bg-neutral-50">
-        <div className="max-w-[1600px] mx-auto">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4 text-center">
-            Коллекции
-          </p>
-          <h2 className="text-4xl lg:text-5xl text-neutral-900 mb-20 text-center">
-            Исследуйте мир SHITSU
-          </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <CategoryCard
-              title="Оригиналы"
-              subtitle="Уникальные произведения"
-              description="Каждая работа создана вручную и существует в единственном экземпляре. Оригиналы для ценителей настоящего искусства."
-              image="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800"
-              href="/originals"
-            />
-            <CategoryCard
-              title="Мерч"
-              subtitle="Принты и аксессуары"
-              description="Лимитированные принты, одежда и предметы с авторским дизайном. Искусство, которое можно взять с собой."
-              image="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800"
-              href="/merch"
-            />
-            <CategoryCard
-              title="Индивидуальный заказ"
-              subtitle="Создадим вместе"
-              description="Ваша идея, мои кисти. Расскажите о своём видении, и я воплощу его в уникальном произведении искусства."
-              image="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800"
-              href="/custom"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-32 px-6 lg:px-12 bg-neutral-900 text-white">
-        <div className="max-w-[800px] mx-auto text-center">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-400 mb-4">
-            Будьте в курсе
-          </p>
-          <h2 className="text-3xl lg:text-4xl mb-6">
-            Подпишитесь на обновления
-          </h2>
-          <p className="text-neutral-400 mb-10 max-w-md mx-auto">
-            Получайте уведомления о новых работах, эксклюзивных предложениях и
-            вдохновении прямо на почту.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input
-              type="email"
-              placeholder="Ваш email"
-              className="flex-1 rounded-full bg-white/10 border-white/20 text-white placeholder:text-neutral-500 focus:border-white"
-            />
-            <Button className="whitespace-nowrap rounded-full bg-white text-neutral-900 hover:bg-neutral-200">
-              Подписаться
-            </Button>
-          </form>
+          {collectionProducts.length === 0 && (
+            <div className="text-center py-20">
+              <p className="text-2xl text-neutral-400">
+                В коллекции пока нет работ
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </div>
@@ -808,15 +787,12 @@ function ProductCard({
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
           />
           {product.isSold && (
-            <div className="absolute inset-0 bg-neutral-900/60 flex items-center justify-center">
-              <Badge variant="sold" className="text-sm">
-                Продано
-              </Badge>
-            </div>
-          )}
-          {product.series && !product.isSold && (
-            <div className="absolute top-4 left-4">
-              <Badge variant="series">{product.series}</Badge>
+            <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-2 shadow-lg">
+              <img
+                src="/headers/sold.png"
+                alt="Продано"
+                className="h-6 w-auto object-contain"
+              />
             </div>
           )}
 
@@ -829,8 +805,7 @@ function ProductCard({
         <Link to={`/product/${product.id}`}>
           <h3
             className={cn(
-              "text-neutral-900 group-hover:text-neutral-600 transition-colors",
-              featured ? "text-2xl" : "text-lg",
+              "text-neutral-900 group-hover:text-neutral-600 transition-colors uppercase tracking-[0.15em] text-sm",
             )}
           >
             {product.name}
@@ -838,7 +813,6 @@ function ProductCard({
         </Link>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm text-neutral-500">{product.medium}</p>
             <p className="text-lg">{product.price.toLocaleString("ru-RU")} ₽</p>
           </div>
           {!product.isSold && (
@@ -846,7 +820,7 @@ function ProductCard({
               size="sm"
               variant="ghost"
               onClick={() => addItem(product)}
-              className="opacity-0 group-hover:opacity-100 transition-all duration-300"
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 uppercase tracking-[0.1em] text-xs"
             >
               В корзину
             </Button>
@@ -857,51 +831,41 @@ function ProductCard({
   );
 }
 
-// Category Card
-function CategoryCard({
-  title,
-  subtitle,
-  description,
-  image,
-  href,
-}: {
-  title: string;
-  subtitle: string;
-  description: string;
-  image: string;
-  href: string;
-}) {
-  return (
-    <Link to={href} className="group block">
-      <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-neutral-200">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/80 via-neutral-900/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-300 mb-2">
-            {subtitle}
-          </p>
-          <h3 className="text-3xl text-white mb-2">{title}</h3>
-        </div>
-      </div>
-      <p className="text-neutral-600 leading-relaxed text-sm">{description}</p>
-    </Link>
-  );
-}
-
 // Product Detail Page
 function ProductPage() {
   const { id } = useParams();
   const product = products.find((p) => p.id === id) || products[0];
   const { addItem } = useCart();
   const [currentImage, setCurrentImage] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Find other products in the same series
+  const seriesProducts = product.seriesId
+    ? products.filter(
+        (p) => p.seriesId === product.seriesId && p.id !== product.id,
+      )
+    : [];
 
   const relatedProducts = products.filter(
-    (p) => p.category === product.category && p.id !== product.id && !p.isSold,
+    (p) =>
+      p.category === product.category &&
+      p.id !== product.id &&
+      !p.isSold &&
+      !(product.seriesId && p.seriesId === product.seriesId),
   );
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!imageContainerRef.current) return;
+    const rect = imageContainerRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPosition({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    });
+  };
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
@@ -918,28 +882,52 @@ function ProductPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Images */}
           <div className="space-y-6">
-            <div className="relative aspect-[4/5] bg-neutral-100 overflow-hidden">
+            {/* Main Image with Zoom */}
+            <div
+              ref={imageContainerRef}
+              className={cn(
+                "relative aspect-[4/5] bg-neutral-100 overflow-hidden",
+                isZoomed ? "cursor-zoom-out" : "cursor-zoom-in",
+              )}
+              onClick={() => setIsZoomed(!isZoomed)}
+              onMouseMove={handleMouseMove}
+            >
               <img
                 src={product.images[currentImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className={cn(
+                  "w-full h-full object-cover transition-transform duration-200",
+                  isZoomed && "scale-[2.5]",
+                )}
+                style={
+                  isZoomed
+                    ? {
+                        transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }
+                    : undefined
+                }
               />
               {product.isSold && (
-                <div className="absolute inset-0 bg-neutral-900/60 flex items-center justify-center">
-                  <Badge variant="sold" className="text-lg">
-                    Продано
-                  </Badge>
+                <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-lg">
+                  <img
+                    src="/headers/sold.png"
+                    alt="Продано"
+                    className="h-8 w-auto object-contain mx-auto"
+                  />
                 </div>
               )}
             </div>
+
+            {/* Thumbnails */}
             {product.images.length > 1 && (
-              <div className="flex gap-4">
+              <div className="flex gap-4 overflow-x-auto pb-2">
                 {product.images.map((img, idx) => (
-                  <button
+                  <Button
                     key={idx}
+                    variant="ghost"
                     onClick={() => setCurrentImage(idx)}
                     className={cn(
-                      "w-20 h-20 overflow-hidden border-2 transition-all duration-300",
+                      "w-20 h-20 p-0 overflow-hidden border-2 transition-all duration-300 rounded-none flex-shrink-0",
                       currentImage === idx
                         ? "border-neutral-900"
                         : "border-transparent hover:border-neutral-300",
@@ -950,7 +938,7 @@ function ProductPage() {
                       alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -960,12 +948,7 @@ function ProductPage() {
           <div className="lg:py-12">
             <div className="space-y-8">
               <div>
-                {product.series && (
-                  <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-                    {product.series}
-                  </p>
-                )}
-                <h1 className="text-4xl lg:text-5xl text-neutral-900 mb-4">
+                <h1 className="text-3xl lg:text-4xl text-neutral-900 mb-4 uppercase tracking-[0.15em]">
                   {product.name}
                 </h1>
                 <p className="text-3xl text-neutral-900">
@@ -973,29 +956,51 @@ function ProductPage() {
                 </p>
               </div>
 
-              <div className="space-y-4 py-8 border-y border-neutral-200">
-                {product.year && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-500">Год создания</span>
-                    <span>{product.year}</span>
+              {/* Series Variants */}
+              {seriesProducts.length > 0 && (
+                <div className="py-6 border-y border-neutral-200">
+                  <h3 className="text-xs text-neutral-500 mb-4 uppercase tracking-[0.15em]">
+                    варианты
+                  </h3>
+                  <div className="flex gap-4 overflow-x-auto pb-2">
+                    {seriesProducts.map((variant) => (
+                      <Link
+                        key={variant.id}
+                        to={`/product/${variant.id}`}
+                        className="group flex-shrink-0"
+                      >
+                        <div className="relative w-20 h-20 bg-neutral-100 overflow-hidden mb-2">
+                          <img
+                            src={variant.images[0]}
+                            alt={variant.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                          {variant.isSold && (
+                            <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5">
+                              <img
+                                src="/headers/sold.png"
+                                alt="Продано"
+                                className="h-3 w-auto object-contain"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-1 max-w-[80px] uppercase tracking-[0.1em]">
+                          {variant.name}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {variant.price.toLocaleString("ru-RU")} ₽
+                        </p>
+                      </Link>
+                    ))}
                   </div>
-                )}
-                {product.medium && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-500">Техника</span>
-                    <span>{product.medium}</span>
-                  </div>
-                )}
-                {product.size && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-neutral-500">Размер</span>
-                    <span>{product.size}</span>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
 
               <div>
-                <h3 className="text-xl mb-4">О работе</h3>
+                <h3 className="text-xs mb-4 uppercase tracking-[0.15em] text-neutral-500">
+                  О работе
+                </h3>
                 <p className="text-neutral-600 leading-relaxed">
                   {product.description}
                 </p>
@@ -1003,13 +1008,17 @@ function ProductPage() {
 
               <div className="pt-4">
                 {product.isSold ? (
-                  <Button disabled className="w-full" size="lg">
+                  <Button
+                    disabled
+                    className="w-full uppercase tracking-[0.1em]"
+                    size="lg"
+                  >
                     Продано
                   </Button>
                 ) : (
                   <Button
                     onClick={() => addItem(product)}
-                    className="w-full"
+                    className="w-full uppercase tracking-[0.1em]"
                     size="lg"
                   >
                     <ShoppingBag className="mr-2 w-5 h-5" />
@@ -1019,10 +1028,7 @@ function ProductPage() {
               </div>
 
               <div className="pt-6 text-xs text-neutral-500 leading-relaxed">
-                <p>
-                  Доставка рассчитывается индивидуально. После оформления заказа
-                  мы свяжемся с вами для уточнения деталей.
-                </p>
+                <p>Доставка рассчитывается индивидуально.</p>
               </div>
             </div>
           </div>
@@ -1030,8 +1036,10 @@ function ProductPage() {
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-32">
-            <h2 className="text-3xl text-neutral-900 mb-12">Похожие работы</h2>
+          <div className="mt-24">
+            <h2 className="text-sm text-neutral-500 mb-12 uppercase tracking-[0.15em]">
+              Похожие работы
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.slice(0, 4).map((p) => (
                 <ProductCard key={p.id} product={p} />
@@ -1048,11 +1056,9 @@ function ProductPage() {
 function CategoryPage({
   category,
   title,
-  description,
 }: {
   category: string;
   title: string;
-  description: string;
 }) {
   const categoryProducts = products.filter(
     (p) => p.category === category || (category === "all" && !p.isSold),
@@ -1062,16 +1068,21 @@ function CategoryPage({
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <div className="max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="max-w-2xl mb-20">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-            Коллекция
-          </p>
-          <h1 className="text-5xl lg:text-7xl text-neutral-900 mb-6">
+        <div className="text-center mb-20">
+          <HeaderImage
+            src={
+              category === "originals"
+                ? "/headers/originals.png"
+                : category === "merch"
+                  ? "/headers/merch.png"
+                  : "/headers/archive.png"
+            }
+            alt={title}
+            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+          />
+          <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             {title}
           </h1>
-          <p className="text-lg text-neutral-600 leading-relaxed">
-            {description}
-          </p>
         </div>
 
         {/* Products Grid */}
@@ -1103,7 +1114,6 @@ function CustomPage() {
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     concept: "",
-    phone: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1115,16 +1125,15 @@ function CustomPage() {
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-            Услуги
-          </p>
-          <h1 className="text-5xl lg:text-6xl text-neutral-900 mb-6">
+          <HeaderImage
+            src="/headers/custom-order.png"
+            alt="Индивидуальный заказ"
+            className="h-16 lg:h-24 w-auto mx-auto mb-6 block"
+            style={{ maxWidth: "100%", minWidth: "200px" }}
+          />
+          <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Индивидуальный заказ
           </h1>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-            Ваша идея достойна воплощения. Расскажите мне о своём видении, и мы
-            создадим что-то уникальное вместе.
-          </p>
         </div>
 
         {/* Pricing Cards */}
@@ -1134,7 +1143,9 @@ function CustomPage() {
               className="w-8 h-8 text-neutral-400 mx-auto mb-4"
               weight="light"
             />
-            <h3 className="text-xl mb-2">Диджитал арт</h3>
+            <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
+              Диджитал арт
+            </h3>
             <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-4">
               От 3 000 ₽
             </p>
@@ -1147,7 +1158,9 @@ function CustomPage() {
               className="w-8 h-8 text-neutral-400 mx-auto mb-4"
               weight="light"
             />
-            <h3 className="text-xl mb-2">Рисунок на холсте</h3>
+            <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
+              Рисунок на холсте
+            </h3>
             <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-4">
               От 5 000 ₽
             </p>
@@ -1160,7 +1173,9 @@ function CustomPage() {
               className="w-8 h-8 text-neutral-400 mx-auto mb-4"
               weight="light"
             />
-            <h3 className="text-xl mb-2">Консультация</h3>
+            <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
+              Консультация
+            </h3>
             <p className="text-xs tracking-[0.2em] uppercase text-neutral-400 mb-4">
               Бесплатно
             </p>
@@ -1176,7 +1191,9 @@ function CustomPage() {
             <div className="w-16 h-16 border border-neutral-900 flex items-center justify-center mx-auto mb-6">
               <Check className="w-8 h-8" weight="light" />
             </div>
-            <h2 className="text-3xl mb-4">Заявка отправлена</h2>
+            <h2 className="text-sm mb-4 uppercase tracking-[0.15em]">
+              Заявка отправлена
+            </h2>
             <p className="text-neutral-600">
               Спасибо за ваше доверие. Я свяжусь с вами в ближайшее время.
             </p>
@@ -1184,7 +1201,10 @@ function CustomPage() {
         ) : (
           <form onSubmit={handleSubmit} className="max-w-lg mx-auto space-y-8">
             <div className="space-y-3">
-              <Label htmlFor="concept" className="text-lg">
+              <Label
+                htmlFor="concept"
+                className="text-xs uppercase tracking-[0.15em] text-neutral-500"
+              >
                 Расскажите о своей идее
               </Label>
               <Textarea
@@ -1200,26 +1220,33 @@ function CustomPage() {
               />
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="phone" className="text-lg">
-                Номер для связи
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                placeholder="+7 (___) ___-__-__"
-                required
-                className="rounded-none border-neutral-300 focus:border-neutral-900"
-              />
+            <div className="space-y-2">
+              {formData.concept.trim() ? (
+                <a
+                  href={createTelegramLink({
+                    "": `ИНДИВИДУАЛЬНЫЙ ЗАКАЗ\n\n${formData.concept}`,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-primary text-primary-foreground hover:bg-primary/80 uppercase tracking-[0.1em] text-sm font-medium transition-all"
+                >
+                  <TelegramLogo className="w-4 h-4" />
+                  Отправить
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-neutral-300 text-neutral-500 uppercase tracking-[0.1em] text-sm font-medium cursor-not-allowed"
+                >
+                  <TelegramLogo className="w-4 h-4" />
+                  Отправить
+                </button>
+              )}
+              <p className="text-xs text-neutral-400 text-center">
+                Для отправки вы будете перенаправлены в телеграм
+              </p>
             </div>
-
-            <Button type="submit" size="lg" className="w-full">
-              Отправить заявку
-            </Button>
           </form>
         )}
       </div>
@@ -1229,70 +1256,120 @@ function CustomPage() {
 
 // About Page
 function AboutPage() {
+  const [scrollY, setScrollY] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (sectionRef.current) {
+        const rect = sectionRef.current.getBoundingClientRect();
+        const sectionTop = rect.top;
+        const windowHeight = window.innerHeight;
+        // Calculate progress from 0 to 1 as section scrolls through viewport
+        const progress = Math.max(
+          0,
+          Math.min(
+            1,
+            (windowHeight - sectionTop) / (windowHeight + rect.height),
+          ),
+        );
+        setScrollY(progress);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial call
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Calculate sticker transform based on scroll
+  const stickerProgress = Math.min(1, Math.max(0, (scrollY - 0.2) * 1.5));
+  const stickerY = 100 - stickerProgress * 100; // Start at 100% (below), end at 0%
+  const stickerRotate = -15 + stickerProgress * 15; // Start at -15deg, end at 0deg
+  const stickerScale = 0.8 + stickerProgress * 0.2; // Start smaller, grow to full
+
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-32">
-          <div className="order-2 lg:order-1">
-            <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-6">
-              Обо мне
+    <div
+      ref={sectionRef}
+      className="min-h-screen pt-32 pb-20 relative overflow-hidden"
+    >
+      {/* Header Image - Sticker Effect */}
+      <div
+        className="fixed right-[5%] bottom-0 z-10 pointer-events-none"
+        style={{
+          transform: `translateY(${stickerY}%) rotate(${stickerRotate}deg) scale(${stickerScale})`,
+          transition: "none",
+          width: "clamp(380px, 50vw, 600px)",
+          opacity: stickerProgress > 0 ? 1 : 0,
+        }}
+      >
+        <img
+          src="/artist.png"
+          alt="Кира"
+          className="w-full h-auto drop-shadow-2xl"
+          style={{
+            filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.25))",
+          }}
+        />
+      </div>
+
+      <div className="max-w-[900px] mx-auto px-6 lg:px-12 relative z-0">
+        {/* Title */}
+        <HeaderImage
+          src="/headers/about.png"
+          alt="Обо мне"
+          className="h-14 lg:h-20 w-auto object-contain mb-12 mx-auto"
+        />
+        <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase mb-12">
+          Обо мне
+        </h1>
+
+        {/* Full-width Text Content */}
+        <div className="space-y-8 text-neutral-600 leading-relaxed text-lg">
+          <p className="text-xl text-neutral-900 font-medium">
+            Еще с детства мне было проще передавать свои чувства через холст,
+            нежели простыми словами.
+          </p>
+
+          <p>
+            Я впервые взяла в руки кисть будучи еще маленьким и ничего не
+            понимающим в этом мире человеком. Сейчас я уже совсем не ребенок, а
+            в жизни так до конца и не разобралась. Но мое творчество помогает
+            мне каждый день понимать что-то большее и показывать это окружающим
+            меня людям.
+          </p>
+
+          <div className="py-8 border-y border-neutral-200 my-8">
+            <p className="text-neutral-900 italic text-xl">
+              "В этом, отчасти, и есть моя цель — создавать картины, которые
+              помогают людям видеть эту жизнь и наслаждаться ей."
             </p>
-            <h1 className="text-5xl lg:text-6xl text-neutral-900 mb-8">
-              Привет!
-              <br />Я художница SHITSU
-            </h1>
-            <div className="space-y-6 text-neutral-600 leading-relaxed">
-              <p>
-                Еще с детства мне было проще передавать свои чувства через
-                холст, нежели простыми словами. Я впервые взяла в руки кисть
-                будучи еще маленьким и ничего не понимающим в этом мире
-                человеком. Сейчас я уже совсем не ребенок, а в жизни так до
-                конца и не разобралась. Но мое творчество помогает мне каждый
-                день понимать что-то большее и показывать это окружающим меня
-                людям.
-              </p>
-              <p>
-                В этом, отчасти, и есть моя цель. Создавать картины, которые
-                помогают людям видеть эту жизнь и наслаждаться ей. Я не гонюсь
-                за модой, за свежими видениями и инновациями. Просто хочу чтобы
-                мои работы передавали красоту, глазами смотрящего. Изображая те
-                вещи, которые хочу отразить в своей памяти и подарить
-                наблюдателям те же чувства.
-              </p>
-              <p>
-                Так же, как в подростковом возрасте, загораются глаза при виде
-                своей первой любви, мои глаза загорелись при изучении Японии. Я
-                вижу невероятные краски в этой стране и ее культуре, что очень
-                часто отражается в моих работах, как дополнение к передачи
-                ощущений.
-              </p>
-              <p>
-                Я приглашаю своих сторонников, видящих яркими цветами эту жизнь,
-                даже в ее темные моменты, присоединиться к моему творчеству.
-                Ведь я влюблена в него и хочу разделить его с вами. Я никогда не
-                останавливаюсь в развитии своего мастерства, так что скучно
-                точно не будет. Но будут чувства, эмоции, которые нам всем
-                иногда бывает так тяжело выразить словами.
-              </p>
-            </div>
           </div>
-          <div className="order-1 lg:order-2">
-            <div className="aspect-[3/4] bg-neutral-100 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800"
-                alt="Кира"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
+
+          <p>
+            Я не гонюсь за модой, за свежими видениями и инновациями. Просто
+            хочу чтобы мои работы передавали красоту, глазами смотрящего.
+            Изображая те вещи, которые хочу отразить в своей памяти и подарить
+            наблюдателям те же чувства.
+          </p>
+
+          <p>
+            Так же, как в подростковом возрасте, загораются глаза при виде своей
+            первой любви, мои глаза загорелись при изучении Японии. Я вижу
+            невероятные краски в этой стране и ее культуре, что очень часто
+            отражается в моих работах.
+          </p>
+
+          <p className="text-neutral-900">
+            Я приглашаю своих сторонников, видящих яркими цветами эту жизнь,
+            даже в ее темные моменты, присоединиться к моему творчеству. Ведь я
+            влюблена в него и хочу разделить его с вами.
+          </p>
         </div>
 
-        {/* Social Links */}
-        <div className="text-center">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-8">
-            Следите за мной
-          </p>
-          <div className="flex justify-center gap-6">
+        {/* CTA */}
+        <div className="mt-16 text-center">
+          <div className="flex justify-center gap-4">
             {[
               {
                 icon: InstagramLogo,
@@ -1306,7 +1383,7 @@ function AboutPage() {
               },
               {
                 icon: TelegramLogo,
-                href: "https://t.me/kira_kirschtein",
+                href: "https://t.me/shitsu_art",
                 label: "Telegram",
               },
             ].map(({ icon: Icon, href, label }) => (
@@ -1338,14 +1415,17 @@ function ContactsPage() {
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-            Связь
-          </p>
-          <h1 className="text-5xl lg:text-6xl text-neutral-900 mb-6">
+          <HeaderImage
+            src="/headers/contacts.png"
+            alt="Контакты"
+            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+          />
+          <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Контакты
           </h1>
-          <p className="text-lg text-neutral-600 max-w-xl mx-auto">
-            Всегда открыта для общения, сотрудничества и новых проектов
+          <p className="inline-flex items-center gap-2 text-sm text-neutral-400">
+            <MapPin className="w-4 h-4" weight="light" />
+            Москва, Россия
           </p>
         </div>
 
@@ -1423,10 +1503,12 @@ function DeliveryPage() {
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
-          <p className="text-xs tracking-[0.3em] uppercase text-neutral-500 mb-4">
-            Информация
-          </p>
-          <h1 className="text-5xl lg:text-6xl text-neutral-900 mb-6">
+          <HeaderImage
+            src="/headers/delivery.png"
+            alt="Доставка и оплата"
+            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+          />
+          <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Доставка и оплата
           </h1>
         </div>
@@ -1435,7 +1517,9 @@ function DeliveryPage() {
           <div className="bg-neutral-50 p-10">
             <div className="flex items-center gap-4 mb-6">
               <Package className="w-8 h-8 text-neutral-400" weight="light" />
-              <h2 className="text-2xl">Доставка</h2>
+              <h2 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
+                Доставка
+              </h2>
             </div>
             <div className="space-y-4 text-neutral-600 leading-relaxed">
               <p>
@@ -1467,7 +1551,9 @@ function DeliveryPage() {
           <div className="bg-neutral-50 p-10">
             <div className="flex items-center gap-4 mb-6">
               <CreditCard className="w-8 h-8 text-neutral-400" weight="light" />
-              <h2 className="text-2xl">Оплата</h2>
+              <h2 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
+                Оплата
+              </h2>
             </div>
             <p className="text-neutral-600 leading-relaxed">
               После оформления заказа я свяжусь с вами для подтверждения деталей
@@ -1476,15 +1562,17 @@ function DeliveryPage() {
             </p>
           </div>
 
-          <div className="bg-neutral-900 text-white p-10">
+          <div className="bg-neutral-50 p-10">
             <div className="flex items-center gap-4 mb-6">
               <ArrowsClockwise
                 className="w-8 h-8 text-neutral-400"
                 weight="light"
               />
-              <h2 className="text-2xl">Возврат</h2>
+              <h2 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
+                Возврат
+              </h2>
             </div>
-            <p className="text-neutral-400 leading-relaxed">
+            <p className="text-neutral-600 leading-relaxed">
               Возврат возможен в течение 14 дней с момента получения заказа.
               Товар должен быть в оригинальном состоянии. Стоимость обратной
               доставки оплачивается покупателем.
@@ -1499,93 +1587,125 @@ function DeliveryPage() {
 // Footer
 function Footer() {
   return (
-    <footer className="border-t border-neutral-200 py-16 px-6 lg:px-12 bg-white">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          {/* Brand */}
-          <div className="md:col-span-2">
-            <Link to="/" className="inline-block mb-4">
-              <span className="text-2xl tracking-[0.1em] font-bold text-neutral-900">
-                SHITSU
-              </span>
+    <footer className="border-t border-neutral-200 bg-white">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+        {/* Main Footer Content */}
+        <div className="py-12 flex flex-col md:flex-row md:items-start justify-between gap-10">
+          {/* Brand Column */}
+          <div className="flex flex-col items-center md:items-start gap-3">
+            <Link to="/" className="group">
+              <img
+                src="/logo.png"
+                alt="SHITSU"
+                className="h-7 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+              />
             </Link>
-            <p className="text-neutral-500 text-sm leading-relaxed max-w-sm">
-              Кира — художница. Оригинальные работы, принты и мерч, созданные с
-              любовью к искусству.
-            </p>
+            <img
+              src="/headers/name.png"
+              alt=""
+              className="h-5 w-auto object-contain opacity-70 mx-auto"
+            />
           </div>
 
-          {/* Navigation */}
-          <div>
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-400 mb-4">
-              Навигация
-            </p>
-            <div className="space-y-3">
-              {[
-                { label: "Оригиналы", href: "/originals" },
-                { label: "Мерч", href: "/merch" },
-                { label: "Индивидуальный заказ", href: "/custom" },
-                { label: "Архив", href: "/archive" },
-              ].map((item) => (
+          {/* Navigation Grid */}
+          <div className="flex flex-wrap justify-center md:justify-end gap-x-12 gap-y-6">
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-neutral-300 font-medium">
+                Коллекция
+              </span>
+              <div className="flex flex-col gap-2">
                 <Link
-                  key={item.href}
-                  to={item.href}
-                  className="block text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                  to="/originals"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
-                  {item.label}
+                  Оригиналы
                 </Link>
-              ))}
+                <Link
+                  to="/merch"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Мерч
+                </Link>
+                <Link
+                  to="/archive"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Архив
+                </Link>
+              </div>
             </div>
-          </div>
 
-          {/* Info */}
-          <div>
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-400 mb-4">
-              Информация
-            </p>
-            <div className="space-y-3">
-              {[
-                { label: "О себе", href: "/about" },
-                { label: "Контакты", href: "/contacts" },
-                { label: "Доставка", href: "/delivery" },
-              ].map((item) => (
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] tracking-[0.25em] uppercase text-neutral-300 font-medium">
+                Информация
+              </span>
+              <div className="flex flex-col gap-2">
                 <Link
-                  key={item.href}
-                  to={item.href}
-                  className="block text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                  to="/about"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
                 >
-                  {item.label}
+                  О себе
                 </Link>
-              ))}
+                <Link
+                  to="/contacts"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Контакты
+                </Link>
+                <Link
+                  to="/delivery"
+                  className="text-sm text-neutral-600 hover:text-neutral-900 transition-colors"
+                >
+                  Доставка
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-neutral-200">
-          <p className="text-xs text-neutral-400">
-            © 2025 SHITSU. Все права защищены.
-          </p>
-          <div className="flex items-center gap-6">
+        {/* Bottom Bar */}
+        <div className="py-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Social Icons */}
+          <div className="flex items-center gap-4">
             {[
               {
                 icon: InstagramLogo,
                 href: "https://instagram.com/shitsu_kira",
+                label: "Instagram",
               },
-              { icon: TiktokLogo, href: "https://www.tiktok.com/@_shitsu" },
-              { icon: TelegramLogo, href: "https://t.me/kira_kirschtein" },
-            ].map(({ icon: Icon, href }) => (
+              {
+                icon: TiktokLogo,
+                href: "https://www.tiktok.com/@_shitsu",
+                label: "TikTok",
+              },
+              {
+                icon: TelegramLogo,
+                href: "https://t.me/kira_kirschtein",
+                label: "Telegram",
+              },
+            ].map(({ icon: Icon, href, label }) => (
               <a
                 key={href}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-400 hover:text-neutral-900 transition-colors"
+                aria-label={label}
+                className="w-10 h-10 border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-50 transition-all duration-300"
               >
-                <Icon className="w-5 h-5" weight="light" />
+                <Icon className="w-4 h-4" weight="light" />
               </a>
             ))}
           </div>
+
+          {/* Credits */}
+          <a
+            href="https://mkeverything.ru"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors tracking-wide"
+          >
+            разработка сайта mkeverything
+          </a>
         </div>
       </div>
     </footer>
@@ -1597,39 +1717,22 @@ export default function App() {
   return (
     <CartProvider>
       <div className="min-h-screen bg-white">
+        <ScrollToTop />
         <Navigation />
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route
               path="/originals"
-              element={
-                <CategoryPage
-                  category="originals"
-                  title="Оригиналы"
-                  description="Уникальные авторские работы в единственном экземпляре. Каждое произведение — это частичка души художника, готовая найти своё место в вашем пространстве."
-                />
-              }
+              element={<CategoryPage category="originals" title="Оригиналы" />}
             />
             <Route
               path="/merch"
-              element={
-                <CategoryPage
-                  category="merch"
-                  title="Мерч"
-                  description="Принты, одежда и аксессуары с авторским дизайном. Искусство, которое можно взять с собой или подарить близкому человеку."
-                />
-              }
+              element={<CategoryPage category="merch" title="Мерч" />}
             />
             <Route
               path="/archive"
-              element={
-                <CategoryPage
-                  category="archive"
-                  title="Архив"
-                  description="Проданные работы из прошлых коллекций. Арт-история SHITSU — от первых шагов до настоящего времени."
-                />
-              }
+              element={<CategoryPage category="archive" title="Архив" />}
             />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/custom" element={<CustomPage />} />
