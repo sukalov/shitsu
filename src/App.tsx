@@ -1,5 +1,12 @@
 import { useState, createContext, useContext, useEffect, useRef } from "react";
-import { Routes, Route, Link, useLocation, useParams } from "react-router";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useParams,
+  useNavigate,
+} from "react-router";
 import {
   ShoppingBag,
   List,
@@ -31,7 +38,174 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
+import { useProducts, useAuth, type Category, type Product } from "@/lib/hooks";
+import {
+  ProductGridSkeleton,
+  ProductDetailSkeleton,
+} from "@/components/loading-states";
+import { ProductImage } from "@/components/product-image";
+import { AdminLogin, AdminLayout } from "@/pages/admin/Login";
+import { AdminProducts } from "@/pages/admin/Products";
+import { AdminOrders } from "@/pages/admin/Orders";
+import { AdminSettings } from "@/pages/admin/Settings";
+
+function AdminIndex() {
+  const navigate = useNavigate();
+  const token = useAuth();
+
+  useEffect(() => {
+    if (token) {
+      void navigate("/admin/products", { replace: true });
+    } else if (token === null) {
+      void navigate("/admin/auth", { replace: true });
+    }
+  }, [token, navigate]);
+
+  return null;
+}
+
+function AdminNotFound() {
+  const navigate = useNavigate();
+  const token = useAuth();
+  const [currentPage, setCurrentPage] = useState("products");
+
+  useEffect(() => {
+    if (token === null) {
+      void navigate("/admin/auth", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (token === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  return (
+    <AdminLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+      <div className="text-center py-20">
+        <h1 className="text-4xl uppercase tracking-widest mb-4">404</h1>
+        <p className="text-neutral-500 mb-8">Страница не найдена</p>
+        <div className="flex justify-center gap-4">
+          <Button onClick={() => void navigate("/")}>Вернуться на сайт</Button>
+          <Button
+            variant="outline"
+            onClick={() => void navigate("/admin/products")}
+          >
+            Админ-панель
+          </Button>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}
+
+function AdminProductsIndex() {
+  const navigate = useNavigate();
+  const token = useAuth();
+  const [currentPage, setCurrentPage] = useState("products");
+
+  useEffect(() => {
+    if (token === null) {
+      void navigate("/admin/auth", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (token === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  return (
+    <AdminLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {currentPage === "products" && <AdminProducts />}
+      {currentPage === "orders" && <AdminOrders />}
+      {currentPage === "settings" && <AdminSettings />}
+    </AdminLayout>
+  );
+}
+
+function AdminOrdersIndex() {
+  const navigate = useNavigate();
+  const token = useAuth();
+  const [currentPage, setCurrentPage] = useState("orders");
+
+  useEffect(() => {
+    if (token === null) {
+      void navigate("/admin/auth", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (token === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  return (
+    <AdminLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {currentPage === "products" && <AdminProducts />}
+      {currentPage === "orders" && <AdminOrders />}
+      {currentPage === "settings" && <AdminSettings />}
+    </AdminLayout>
+  );
+}
+
+function AdminSettingsIndex() {
+  const navigate = useNavigate();
+  const token = useAuth();
+  const [currentPage, setCurrentPage] = useState("settings");
+
+  useEffect(() => {
+    if (token === null) {
+      void navigate("/admin/auth", { replace: true });
+    }
+  }, [token, navigate]);
+
+  if (token === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="animate-pulse">Загрузка...</div>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  return (
+    <AdminLayout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {currentPage === "products" && <AdminProducts />}
+      {currentPage === "orders" && <AdminOrders />}
+      {currentPage === "settings" && <AdminSettings />}
+    </AdminLayout>
+  );
+}
 
 function HeaderImage({
   src,
@@ -75,173 +249,14 @@ function createTelegramLink(
   return `https://t.me/shitsu_zakaz?text=${encodedText}`;
 }
 
-// Types
-interface Product {
-  id: string;
+interface CartItem {
+  _id: string;
   name: string;
   price: number;
-  category: "originals" | "merch" | "archive";
-  subcategory?: string;
-  images: string[];
-  description: string;
-  isSold: boolean;
-  seriesId?: string;
-}
-
-interface CartItem extends Product {
   quantity: number;
+  images: string[];
 }
 
-// Mock Data
-const products: Product[] = [
-  {
-    id: "1",
-    name: "Эфемерность",
-    price: 15000,
-    category: "originals",
-    images: [
-      "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800",
-      "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800",
-      "https://images.unsplash.com/photo-1549887534-1541e9326642?w=800",
-      "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800",
-    ],
-    description:
-      "Абстрактная композиция, исследующая тему времени и трансформации. Работа погружает зрителя в медитативное состояние, приглашая к созерцанию мимолётности момента. Создана в 2024 году. Акрил на холсте, 40 × 50 см.",
-    isSold: false,
-  },
-  {
-    id: "2",
-    name: "Полуночный сад",
-    price: 12000,
-    category: "originals", // originals or merch
-    images: ["https://images.unsplash.com/photo-1549887534-1541e9326642?w=800"],
-    description:
-      "Ночной пейзаж с элементами сюрреализма. Тайный мир, открывающийся только в темноте, полный мистики и неожиданных открытий. Создан в 2024 году. Масло на холсте, 30 × 40 см.",
-    isSold: false,
-  },
-  {
-    id: "3",
-    name: "Хаос и порядок",
-    price: 18000,
-    category: "originals",
-    images: ["https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=800"],
-    description:
-      "Исследование противопоставления структуры и хаоса. В каждом беспорядке скрыта гармония, ожидающая своего открытия. Создан в 2023 году. Смешанная техника, 50 × 60 см.",
-    isSold: false,
-  },
-  {
-    id: "4",
-    name: "Звёздная пыль",
-    price: 2500,
-    category: "merch",
-    subcategory: "Принты",
-    images: [
-      "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800",
-      "https://images.unsplash.com/photo-1549490349-8643362247b5?w=800",
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800",
-    ],
-    description:
-      "Цифровой принт на бумаге премиум качества. Каждый принт подписан автором и имеет сертификат подлинности. Создан в 2024 году. Размер 30 × 40 см.",
-    isSold: false,
-    seriesId: "sticker-pack-series",
-  },
-  {
-    id: "5",
-    name: "Лунное затмение",
-    price: 2500,
-    category: "merch",
-    subcategory: "Принты",
-    images: [
-      "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800",
-      "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800",
-      "https://images.unsplash.com/photo-1614730341194-75c607400070?w=800",
-    ],
-    description:
-      "Лимитированная серия из 50 экземпляров. Момент величественного космического явления, застывший навсегда. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
-    isSold: false,
-    seriesId: "cosmic-series",
-  },
-  {
-    id: "5a",
-    name: "Солнечное затмение",
-    price: 2800,
-    category: "merch",
-    subcategory: "Принты",
-    images: [
-      "https://images.unsplash.com/photo-1532693322450-2cb5c511067d?w=800",
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800",
-      "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=800",
-    ],
-    description:
-      "Дополнение к космической серии. Изображение солнечного затмения с уникальными деталями. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
-    isSold: false,
-    seriesId: "cosmic-series",
-  },
-  {
-    id: "5b",
-    name: "Звездный путь",
-    price: 2200,
-    category: "merch",
-    subcategory: "Принты",
-    images: [
-      "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800",
-      "https://images.unsplash.com/photo-1465101162946-4377e57745c3?w=800",
-    ],
-    description:
-      "Абстрактное изображение звездного пути. Часть космической коллекции. Создан в 2024 году. Цифровой принт, 30 × 40 см.",
-    isSold: false,
-    seriesId: "cosmic-series",
-  },
-  {
-    id: "6",
-    name: "Отражение",
-    price: 22000,
-    category: "archive",
-    images: ["https://images.unsplash.com/photo-1549490349-8643362247b5?w=800"],
-    description:
-      "Диптих о внутреннем и внешнем мире. Работа нашла свой дом в частной коллекции. Создан в 2023 году. Масло на холсте, 60 × 80 см.",
-    isSold: true,
-  },
-  {
-    id: "7",
-    name: "Арт-футболка",
-    price: 3500,
-    category: "merch",
-    subcategory: "Одежда",
-    images: [
-      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
-      "https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=800",
-      "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800",
-    ],
-    description:
-      "100% органический хлопок. Уникальный принт, созданный вручную. Каждая футболка — как миниатюрная галерея. Доступны размеры: S, M, L, XL.",
-    isSold: false,
-  },
-  {
-    id: "8",
-    name: "Тетрадь «Мысли»",
-    price: 800,
-    category: "merch",
-    subcategory: "Аксессуары",
-    images: ["https://images.unsplash.com/photo-1544816155-12df9643f363?w=800"],
-    description:
-      "А5, 48 листов премиум бумаги. Дизайнерская обложка с иллюстрацией. Идеальна для записей и зарисовок. Создана в 2024 году.",
-    isSold: false,
-  },
-];
-
-// ScrollToTop component - scrolls to top on route change
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
-
-// Cart Context
 interface CartContextType {
   items: CartItem[];
   addItem: (product: Product) => void;
@@ -260,22 +275,32 @@ function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const addItem = (product: Product) => {
+    const productId = product._id.toString();
     setItems((current) => {
-      const existing = current.find((item) => item.id === product.id);
+      const existing = current.find((item) => item._id === productId);
       if (existing) {
         return current.map((item) =>
-          item.id === product.id
+          item._id === productId
             ? { ...item, quantity: item.quantity + 1 }
             : item,
         );
       }
-      return [...current, { ...product, quantity: 1 }];
+      return [
+        ...current,
+        {
+          _id: productId,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          images: product.images,
+        },
+      ];
     });
     setIsOpen(true);
   };
 
   const removeItem = (productId: string) => {
-    setItems((current) => current.filter((item) => item.id !== productId));
+    setItems((current) => current.filter((item) => item._id !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -285,7 +310,7 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     }
     setItems((current) =>
       current.map((item) =>
-        item.id === productId ? { ...item, quantity } : item,
+        item._id === productId ? { ...item, quantity } : item,
       ),
     );
   };
@@ -313,6 +338,29 @@ function CartProvider({ children }: { children: React.ReactNode }) {
       {children}
     </CartContext.Provider>
   );
+}
+
+// ScrollToTop component - scrolls to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
+// Cart Context
+interface CartContextType {
+  items: CartItem[];
+  addItem: (product: Product) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  total: number;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
 }
 
 function useCart() {
@@ -642,12 +690,12 @@ function CartSidebar() {
               <div className="space-y-8">
                 {items.map((item) => (
                   <div
-                    key={item.id}
+                    key={item._id}
                     className="flex gap-6 pb-6 border-b border-neutral-200 last:border-0"
                   >
                     <div className="w-24 h-24 bg-neutral-100 overflow-hidden flex-shrink-0">
                       <img
-                        src={item.images[0]}
+                        src={getImageUrl(item.images[0])}
                         alt={item.name}
                         className="w-full h-full object-cover"
                       />
@@ -662,7 +710,7 @@ function CartSidebar() {
                       <div className="flex items-center gap-3">
                         <Button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(item._id, item.quantity - 1)
                           }
                           variant="outline"
                           size="icon-sm"
@@ -675,7 +723,7 @@ function CartSidebar() {
                         </span>
                         <Button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            updateQuantity(item._id, item.quantity + 1)
                           }
                           variant="outline"
                           size="icon-sm"
@@ -686,7 +734,7 @@ function CartSidebar() {
                       </div>
                     </div>
                     <Button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item._id)}
                       variant="ghost"
                       size="icon-xs"
                       className="text-neutral-300 hover:text-neutral-900 self-start"
@@ -728,6 +776,18 @@ function CartSidebar() {
 
 // Home Page
 function HomePage() {
+  const products = useProducts();
+
+  if (!products) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <div className="max-w-[1600px] mx-auto">
+          <ProductGridSkeleton count={8} />
+        </div>
+      </div>
+    );
+  }
+
   // Combine originals and merch, exclude sold items
   const collectionProducts = products.filter(
     (p) => (p.category === "originals" || p.category === "merch") && !p.isSold,
@@ -741,7 +801,7 @@ function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
             {collectionProducts.map((product, idx) => (
               <div
-                key={product.id}
+                key={product._id}
                 className={cn(idx % 5 === 0 && "lg:col-span-2 lg:row-span-2")}
               >
                 <ProductCard product={product} featured={idx % 5 === 0} />
@@ -774,17 +834,18 @@ function ProductCard({
 
   return (
     <div className="group">
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product._id}`}>
         <div
           className={cn(
             "relative overflow-hidden mb-6 bg-neutral-100",
             featured ? "aspect-[3/4]" : "aspect-[4/5]",
           )}
         >
-          <img
+          <ProductImage
             src={product.images[0]}
             alt={product.name}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+            aspectRatio={featured ? "3/4" : "4/5"}
           />
           {product.isSold && (
             <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-2 shadow-lg">
@@ -802,7 +863,7 @@ function ProductCard({
       </Link>
 
       <div className="space-y-2">
-        <Link to={`/product/${product.id}`}>
+        <Link to={`/product/${product._id}`}>
           <h3
             className={cn(
               "text-neutral-900 group-hover:text-neutral-600 transition-colors uppercase tracking-[0.15em] text-sm",
@@ -834,24 +895,45 @@ function ProductCard({
 // Product Detail Page
 function ProductPage() {
   const { id } = useParams();
-  const product = products.find((p) => p.id === id) || products[0];
+  const products = useProducts();
+  const product =
+    products?.find((p) => p._id === id) || (products && products[0]);
+  const allProducts = useProducts();
   const { addItem } = useCart();
   const [currentImage, setCurrentImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
+  if (!products) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <div className="max-w-[1600px] mx-auto">
+          <ProductDetailSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12 flex items-center justify-center">
+        <p className="text-xl text-neutral-400">Товар не найден</p>
+      </div>
+    );
+  }
+
   // Find other products in the same series
   const seriesProducts = product.seriesId
-    ? products.filter(
-        (p) => p.seriesId === product.seriesId && p.id !== product.id,
+    ? (allProducts || []).filter(
+        (p) => p.seriesId === product.seriesId && p._id !== product._id,
       )
     : [];
 
-  const relatedProducts = products.filter(
+  const relatedProducts = (allProducts || []).filter(
     (p) =>
       p.category === product.category &&
-      p.id !== product.id &&
+      p._id !== product._id &&
       !p.isSold &&
       !(product.seriesId && p.seriesId === product.seriesId),
   );
@@ -893,7 +975,7 @@ function ProductPage() {
               onMouseMove={handleMouseMove}
             >
               <img
-                src={product.images[currentImage]}
+                src={getImageUrl(product.images[currentImage])}
                 alt={product.name}
                 className={cn(
                   "w-full h-full object-cover transition-transform duration-200",
@@ -934,7 +1016,7 @@ function ProductPage() {
                     )}
                   >
                     <img
-                      src={img}
+                      src={getImageUrl(img)}
                       alt={`${product.name} ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -965,13 +1047,13 @@ function ProductPage() {
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {seriesProducts.map((variant) => (
                       <Link
-                        key={variant.id}
-                        to={`/product/${variant.id}`}
+                        key={variant._id}
+                        to={`/product/${variant._id}`}
                         className="group flex-shrink-0"
                       >
                         <div className="relative w-20 h-20 bg-neutral-100 overflow-hidden mb-2">
                           <img
-                            src={variant.images[0]}
+                            src={getImageUrl(variant.images[0])}
                             alt={variant.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           />
@@ -1042,7 +1124,7 @@ function ProductPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.slice(0, 4).map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={p._id} product={p} />
               ))}
             </div>
           </div>
@@ -1056,13 +1138,28 @@ function ProductPage() {
 function CategoryPage({
   category,
   title,
+  isSold,
 }: {
-  category: string;
+  category?: string;
   title: string;
+  isSold?: boolean;
 }) {
-  const categoryProducts = products.filter(
-    (p) => p.category === category || (category === "all" && !p.isSold),
-  );
+  const products = useProducts(category as Category, isSold);
+
+  if (!products) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="text-center mb-20">
+            <div className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6 bg-neutral-100 animate-pulse w-48" />
+          </div>
+          <ProductGridSkeleton count={8} />
+        </div>
+      </div>
+    );
+  }
+
+  const categoryProducts = products;
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
@@ -1089,7 +1186,7 @@ function CategoryPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
           {categoryProducts.map((product, idx) => (
             <div
-              key={product.id}
+              key={product._id}
               className={cn(idx % 5 === 0 && "lg:col-span-2 lg:row-span-2")}
             >
               <ProductCard product={product} featured={idx % 5 === 0} />
@@ -1698,14 +1795,23 @@ function Footer() {
           </div>
 
           {/* Credits */}
-          <a
-            href="https://mkeverything.ru"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors tracking-wide"
-          >
-            разработка сайта mkeverything
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://mkeverything.ru"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors tracking-wide"
+            >
+              разработка сайта mkeverything
+            </a>
+            <span className="text-neutral-300">|</span>
+            <a
+              href="/admin"
+              className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors tracking-wide"
+            >
+              админ
+            </a>
+          </div>
         </div>
       </div>
     </footer>
@@ -1714,12 +1820,17 @@ function Footer() {
 
 // Main App
 export default function App() {
+  const location = useLocation();
+  const isAdminRoute =
+    location.pathname.startsWith("/admin/") &&
+    location.pathname !== "/admin/auth";
+
   return (
     <CartProvider>
       <div className="min-h-screen bg-white">
         <ScrollToTop />
-        <Navigation />
-        <main>
+        {!isAdminRoute && <Navigation />}
+        <main className={isAdminRoute ? "pt-16" : ""}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route
@@ -1732,16 +1843,22 @@ export default function App() {
             />
             <Route
               path="/archive"
-              element={<CategoryPage category="archive" title="Архив" />}
+              element={<CategoryPage title="Архив" isSold={true} />}
             />
             <Route path="/product/:id" element={<ProductPage />} />
             <Route path="/custom" element={<CustomPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contacts" element={<ContactsPage />} />
             <Route path="/delivery" element={<DeliveryPage />} />
+            <Route path="/admin" element={<AdminIndex />} />
+            <Route path="/admin/auth" element={<AdminLogin />} />
+            <Route path="/admin/products" element={<AdminProductsIndex />} />
+            <Route path="/admin/orders" element={<AdminOrdersIndex />} />
+            <Route path="/admin/settings" element={<AdminSettingsIndex />} />
+            <Route path="/admin/*" element={<AdminNotFound />} />
           </Routes>
         </main>
-        <Footer />
+        {!isAdminRoute && <Footer />}
         <CartSidebar />
       </div>
     </CartProvider>
