@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdminExists, useSetupAdmin, useLogin } from "@/lib/hooks";
-import { cn } from "@/lib/utils";
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -120,91 +119,6 @@ export function AdminLogin() {
           </a>
         </div>
       </div>
-    </div>
-  );
-}
-
-export function AdminLayout({
-  children,
-  currentPage,
-  onNavigate,
-}: {
-  children: React.ReactNode;
-  currentPage: string;
-  onNavigate: (page: string) => void;
-}) {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    void navigate("/admin");
-  };
-
-  return (
-    <div className="min-h-screen bg-neutral-50">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <a href="/" className="text-xl uppercase tracking-[0.15em]">
-              SHITSU
-            </a>
-            <nav className="flex gap-6">
-              <button
-                onClick={() => onNavigate("products")}
-                className={cn(
-                  "text-sm uppercase tracking-[0.1em] transition-colors",
-                  currentPage === "products"
-                    ? "text-neutral-900"
-                    : "text-neutral-500 hover:text-neutral-900",
-                )}
-              >
-                Товары
-              </button>
-              <button
-                onClick={() => onNavigate("orders")}
-                className={cn(
-                  "text-sm uppercase tracking-[0.1em] transition-colors",
-                  currentPage === "orders"
-                    ? "text-neutral-900"
-                    : "text-neutral-500 hover:text-neutral-900",
-                )}
-              >
-                Заказы
-              </button>
-              <button
-                onClick={() => onNavigate("settings")}
-                className={cn(
-                  "text-sm uppercase tracking-[0.1em] transition-colors",
-                  currentPage === "settings"
-                    ? "text-neutral-900"
-                    : "text-neutral-500 hover:text-neutral-900",
-                )}
-              >
-                Настройки
-              </button>
-            </nav>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
-          >
-            Выйти
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
-
-      <footer className="border-t mt-auto">
-        <div className="max-w-7xl mx-auto px-4 py-4 text-center">
-          <a
-            href="/"
-            className="text-xs text-neutral-500 hover:text-neutral-900 transition-colors"
-          >
-            Вернуться на сайт
-          </a>
-        </div>
-      </footer>
     </div>
   );
 }
