@@ -42,7 +42,7 @@ export function Navigation() {
           <div className="flex items-center justify-between">
             <Link to="/" className="relative group">
               <img
-                src="/logo.png"
+                src="./logo.png"
                 alt="SHITSU"
                 className="h-8 lg:h-10 w-auto object-contain"
               />

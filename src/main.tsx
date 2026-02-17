@@ -6,7 +6,13 @@ import { BrowserRouter } from "react-router";
 import "./index.css";
 import App from "./App.tsx";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
+if (!convexUrl) {
+  console.error("VITE_CONVEX_URL is not set. Please configure the Convex URL.");
+}
+const convex = new ConvexReactClient(
+  convexUrl || "https://your-convex-url.convex.cloud",
+);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

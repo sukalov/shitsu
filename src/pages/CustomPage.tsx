@@ -27,7 +27,7 @@ export function CustomPage() {
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="/headers/custom-order.png"
+            src="./headers/custom-order.png"
             alt="Индивидуальный заказ"
             className="h-16 lg:h-24 w-auto mx-auto mb-6 block"
             style={{ maxWidth: "100%", minWidth: "200px" }}

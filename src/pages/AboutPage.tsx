@@ -66,7 +66,7 @@ export function AboutPage() {
         }}
       >
         <img
-          src="/artist.png"
+          src="./artist.png"
           alt="Кира"
           className="w-full h-auto drop-shadow-2xl"
           style={{
@@ -77,7 +77,7 @@ export function AboutPage() {
 
       <div className="max-w-[900px] mx-auto px-6 lg:px-12 relative z-0">
         <HeaderImage
-          src="/headers/about.png"
+          src="./headers/about.png"
           alt="Обо мне"
           className="h-14 lg:h-20 w-auto object-contain mb-12 mx-auto"
         />

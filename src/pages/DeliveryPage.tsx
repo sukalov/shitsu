@@ -7,7 +7,7 @@ export function DeliveryPage() {
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="/headers/delivery.png"
+            src="./headers/delivery.png"
             alt="Доставка и оплата"
             className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
           />

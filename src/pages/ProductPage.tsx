@@ -83,7 +83,7 @@ export function ProductPage() {
         {p.isSold && (
           <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5">
             <img
-              src="/headers/sold.png"
+              src="./headers/sold.png"
               alt="Продано"
               className="h-3 w-auto object-contain"
             />
@@ -139,7 +139,7 @@ export function ProductPage() {
               {product.isSold && (
                 <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-lg">
                   <img
-                    src="/headers/sold.png"
+                    src="./headers/sold.png"
                     alt="Продано"
                     className="h-8 w-auto object-contain mx-auto"
                   />

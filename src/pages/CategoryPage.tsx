@@ -34,10 +34,10 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
           <HeaderImage
             src={
               category === "originals"
-                ? "/headers/originals.png"
+                ? "./headers/originals.png"
                 : category === "merch"
-                  ? "/headers/merch.png"
-                  : "/headers/archive.png"
+                  ? "./headers/merch.png"
+                  : "./headers/archive.png"
             }
             alt={title}
             className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
