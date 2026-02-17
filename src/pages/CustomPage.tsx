@@ -46,11 +46,8 @@ export function CustomPage() {
             <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
               Диджитал арт
             </h3>
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-4">
+            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500">
               От 3 000 ₽
-            </p>
-            <p className="text-sm text-neutral-600">
-              Цифровые иллюстрации, принты, графика
             </p>
           </div>
           <div className="bg-neutral-50 p-8 text-center">
@@ -61,11 +58,8 @@ export function CustomPage() {
             <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
               Рисунок на холсте
             </h3>
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-4">
+            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500">
               От 5 000 ₽
-            </p>
-            <p className="text-sm text-neutral-600">
-              Акрил, масло, смешанная техника
             </p>
           </div>
           <div className="bg-neutral-900 p-8 text-center text-white">
@@ -76,11 +70,8 @@ export function CustomPage() {
             <h3 className="text-sm mb-2 uppercase tracking-[0.15em]">
               Консультация
             </h3>
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-400 mb-4">
+            <p className="text-xs tracking-[0.2em] uppercase text-neutral-400">
               Бесплатно
-            </p>
-            <p className="text-sm text-neutral-400">
-              Подбор техники, цветов, размера
             </p>
           </div>
         </div>
