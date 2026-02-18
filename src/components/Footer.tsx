@@ -120,12 +120,12 @@ export function Footer() {
               разработка сайта mkeverything
             </a>
             <span className="text-neutral-300">|</span>
-            <a
-              href="/admin"
+            <Link
+              to="/admin"
               className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors tracking-wide"
             >
               админ
-            </a>
+            </Link>
           </div>
         </div>
       </div>
