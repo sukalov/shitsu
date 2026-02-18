@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SHITSU — Кира, художница</title>
     <script>
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
       (function (l) {
         if (l.search[1] === "/") {
           var decoded = l.search
@@ -25,9 +22,22 @@
         }
       })(window.location);
     </script>
-    <meta http-equiv="refresh" content="0;URL='/shitsu/'" />
   </head>
   <body>
-    <p>Redirecting...</p>
+    <div id="root"></div>
+    <script>
+      fetch("/shitsu/index.html")
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (html) {
+          document.open();
+          document.write(html);
+          document.close();
+        })
+        .catch(function () {
+          window.location.href = "/shitsu/";
+        });
+    </script>
   </body>
 </html>
