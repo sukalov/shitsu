@@ -1,10 +1,12 @@
-import { MapPin } from "@phosphor-icons/react";
+import { MapPin, Envelope } from "@phosphor-icons/react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
+import { SEO } from "@/components/SEO";
 
 export function ContactsPage() {
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+      <SEO page="contacts" />
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
@@ -26,10 +28,9 @@ export function ContactsPage() {
             href="mailto:shitsu2319@gmail.com"
             className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
           >
-            <InstagramLogo
+            <Envelope
               className="w-8 h-8 text-neutral-400 mb-6"
               weight="light"
-              style={{ display: "none" }}
             />
             <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
               Email
@@ -70,7 +71,7 @@ export function ContactsPage() {
           </a>
 
           <a
-            href="https://t.me/kira_kirschtein"
+            href="https://t.me/shitsu_art"
             target="_blank"
             rel="noopener noreferrer"
             className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
@@ -82,7 +83,7 @@ export function ContactsPage() {
             <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
               Telegram
             </p>
-            <p className="text-xl">@kira_kirschtein</p>
+            <p className="text-xl">@shitsu_art</p>
           </a>
         </div>
       </div>

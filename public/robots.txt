@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shitsu.art/sitemap.xml
+Host: https://shitsu.art
+
+User-agent: Yandex
+Allow: /
+Crawl-delay: 1

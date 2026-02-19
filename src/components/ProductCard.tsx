@@ -24,7 +24,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
         >
           <ProductImage
             src={product.images[0]}
-            alt={product.name}
+            alt={`Картина "${product.name}" — Кира SHITSU, Москва`}
             className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
             aspectRatio={featured ? "3/4" : "4/5"}
           />
@@ -32,7 +32,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
             <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-2 shadow-lg">
               <img
                 src="./headers/sold.png"
-                alt="Продано"
+                alt="Картина продана"
                 className="h-6 w-auto object-contain"
               />
             </div>

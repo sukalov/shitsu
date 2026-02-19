@@ -4,22 +4,22 @@
 
 ```bash
 # Development (frontend + backend)
-npm run dev
+bun run dev
 
 # Frontend only
-npm run dev:frontend
+bun run dev:frontend
 
 # Backend only (Convex)
-npm run dev:backend
+bun run dev:backend
 
 # Production build
-npm run build
+bun run build
 
 # Linting (TypeScript + ESLint)
-npm run lint
+bun run lint
 
 # Preview production build
-npm run preview
+bun run preview
 ```
 
 ## Tech Stack
@@ -148,3 +148,55 @@ convex/
 - Bold, intentional aesthetic - avoid generic "AI slop"
 - Every UI element built on shadcn/Base UI primitives
 - Follow existing patterns in codebase
+
+## SEO Implementation
+
+### Files Created
+
+- `src/components/SEO.tsx` - React Helmet component for meta tags
+- `src/lib/seo-config.ts` - Site config, page SEO, and `generateProductMeta()`
+- `src/lib/schema.ts` - JSON-LD schema generators
+- `src/lib/sitemap.ts` - Sitemap generator utility
+- `public/robots.txt` - Search engine directives
+- `public/sitemap.xml` - Static sitemap (update when adding products)
+
+### SEO Post-Deployment Checklist
+
+**Yandex Setup (Critical for Russian SEO):**
+
+- [ ] Create account at [Yandex.Webmaster](https://webmaster.yandex.com)
+- [ ] Add site and verify ownership (replace `YOUR_YANDEX_VERIFICATION_CODE` in index.html)
+- [ ] Submit sitemap: `https://[your-domain]/sitemap.xml`
+- [ ] Set geo-region to Moscow in Yandex.Webmaster settings
+
+**Yandex.Metrica (Analytics):**
+
+- [ ] Create account at [Yandex.Metrica](https://metrica.yandex.com)
+- [ ] Add tracking code to `index.html` (after verification)
+
+**Yandex.Business (Local SEO):**
+
+- [ ] Create listing at [Yandex.Business](https://business.yandex.com)
+- [ ] Add to Yandex.Maps with category "Художник" or "Арт-галерея"
+- [ ] Include: address, phone, hours, photos
+
+**Other Russian Platforms:**
+
+- [ ] Create VKontakte page (VK is #1 social network in Russia)
+- [ ] Register on 2GIS (popular Moscow directory)
+- [ ] Create Google My Business (for Google.ru)
+
+**Domain & Technical:**
+
+- [ ] Update `SITE_CONFIG.url` in `src/lib/seo-config.ts` with production domain
+- [ ] Update `robots.txt` and `sitemap.xml` with production domain
+- [ ] Update `index.html` canonical URLs
+- [ ] Test meta tags with [Yandex Webmaster Tools](https://webmaster.yandex.com)
+
+**Keywords to Track (Yandex Wordstat):**
+
+- купить картину Москва
+- художник на заказ Москва
+- картина маслом купить
+- японский стиль живопись
+- Кира SHITSU

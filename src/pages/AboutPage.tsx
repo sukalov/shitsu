@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
+import { SEO } from "@/components/SEO";
 
 const socialLinks = [
   {
@@ -56,6 +57,7 @@ export function AboutPage() {
       ref={sectionRef}
       className="min-h-screen pt-32 pb-20 relative overflow-hidden"
     >
+      <SEO page="about" />
       <div
         className="fixed right-[5%] bottom-0 z-10 pointer-events-none"
         style={{
@@ -67,7 +69,7 @@ export function AboutPage() {
       >
         <img
           src="./artist.png"
-          alt="Кира"
+          alt="Художница Кира (SHITSU) — Москва, Россия"
           className="w-full h-auto drop-shadow-2xl"
           style={{
             filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.25))",
@@ -85,45 +87,42 @@ export function AboutPage() {
           Обо мне
         </h1>
 
-        <div className="space-y-8 text-neutral-600 leading-relaxed text-lg">
-          <p className="text-xl text-neutral-900 font-medium">
-            Еще с детства мне было проще передавать свои чувства через холст,
-            нежели простыми словами.
+        <div className="space-y-6 text-neutral-600 leading-relaxed text-lg text-justify">
+          <p className="text-neutral-900">
+            <span className="float-left mr-3 text-4xl leading-none font-light">
+              Е
+            </span>
+            ще с детства мне было проще передавать свои чувства через холст,
+            нежели простыми словами. Я впервые взяла в руки кисть будучи еще
+            маленьким и ничего не понимающим в этом мире человеком. Сейчас я уже
+            совсем не ребенок, а в жизни так до конца и не разобралась. Но мое
+            творчество помогает мне каждый день понимать что-то большее и
+            показывать это окружающим меня людям.
           </p>
 
-          <p>
-            Я впервые взяла в руки кисть будучи еще маленьким и ничего не
-            понимающим в этом мире человеком. Сейчас я уже совсем не ребенок, а
-            в жизни так до конца и не разобралась. Но мое творчество помогает
-            мне каждый день понимать что-то большее и показывать это окружающим
-            меня людям.
-          </p>
-
-          <div className="py-8 border-y border-neutral-200 my-8">
-            <p className="text-neutral-900 italic text-xl">
-              "В этом, отчасти, и есть моя цель — создавать картины, которые
-              помогают людям видеть эту жизнь и наслаждаться ей."
-            </p>
-          </div>
-
-          <p>
+          <p className="indent-8">
             Я не гонюсь за модой, за свежими видениями и инновациями. Просто
             хочу чтобы мои работы передавали красоту, глазами смотрящего.
             Изображая те вещи, которые хочу отразить в своей памяти и подарить
             наблюдателям те же чувства.
           </p>
 
-          <p>
+          <p className="indent-8">
             Так же, как в подростковом возрасте, загораются глаза при виде своей
             первой любви, мои глаза загорелись при изучении Японии. Я вижу
             невероятные краски в этой стране и ее культуре, что очень часто
             отражается в моих работах.
           </p>
 
-          <p className="text-neutral-900">
+          <p className="indent-8">
             Я приглашаю своих сторонников, видящих яркими цветами эту жизнь,
             даже в ее темные моменты, присоединиться к моему творчеству. Ведь я
             влюблена в него и хочу разделить его с вами.
+          </p>
+          <p>
+            Я никогда не останавливаюсь в развитии своего мастерства,
+            так что скучно точно не будет. Но будут чувства, эмоции, которые нам всем иногда
+            бывает так тяжело выразить словами.
           </p>
         </div>
 

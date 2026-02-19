@@ -1,6 +1,7 @@
 import { useProducts } from "@/lib/hooks";
 import { ProductGridSkeleton } from "@/components/loading-states";
 import { ProductCard } from "@/components/ProductCard";
+import { SEO } from "@/components/SEO";
 
 export function HomePage() {
   const products = useProducts();
@@ -21,6 +22,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <SEO page="home" />
       <section className="py-32 px-6 lg:px-12 bg-neutral-50">
         <div className="max-w-[1600px] mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">

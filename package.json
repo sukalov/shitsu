@@ -10,7 +10,8 @@
     "predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
     "build": "tsc -b && vite build",
     "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seo:check": "echo 'Run these SEO checks after deployment: 1) Verify robots.txt at /robots.txt 2) Verify sitemap at /sitemap.xml 3) Test meta tags with SEO tools 4) Submit sitemap to Yandex.Webmaster'"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -23,6 +24,7 @@
     "convex": "^1.31.7",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-helmet-async": "^2.0.5",
     "react-router": "^7.13.0",
     "shadcn": "^3.8.3",
     "tailwind-merge": "^3.4.0",

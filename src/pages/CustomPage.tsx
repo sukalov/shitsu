@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { HeaderImage } from "@/components/HeaderImage";
 import { createTelegramLink } from "@/lib/telegram";
+import { SEO } from "@/components/SEO";
 
 export function CustomPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -24,6 +25,7 @@ export function CustomPage() {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+      <SEO page="custom" />
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage

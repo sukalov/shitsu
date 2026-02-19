@@ -33,6 +33,7 @@ export function Navigation() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+          isMenuOpen && "hidden",
           isScrolled
             ? "bg-white/95 backdrop-blur-md py-4 shadow-sm"
             : "bg-transparent py-6",
@@ -101,7 +102,16 @@ export function Navigation() {
 
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-white">
-          <div className="flex flex-col items-center justify-center h-full">
+          <div className="absolute top-6 left-6">
+            <Link to="/" onClick={() => setIsMenuOpen(false)}>
+              <img
+                src="./logo.png"
+                alt="SHITSU"
+                className="h-8 w-auto object-contain"
+              />
+            </Link>
+          </div>
+          <div className="flex flex-col items-start justify-center h-full pl-12">
             {menuItems.map((item, idx) => (
               <Link
                 key={item.href}

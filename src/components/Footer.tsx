@@ -14,7 +14,7 @@ const socialLinks = [
   },
   {
     icon: TelegramLogo,
-    href: "https://t.me/kira_kirschtein",
+    href: "https://t.me/shitsu_art",
     label: "Telegram",
   },
 ];
@@ -29,13 +29,13 @@ export function Footer() {
               <img
                 src="./logo.png"
                 alt="SHITSU"
-                className="h-7 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+                className="h-7 w-auto object-contain group-hover:opacity-70 transition-opacity"
               />
             </Link>
             <img
               src="./headers/name.png"
               alt=""
-              className="h-5 w-auto object-contain opacity-70 mx-auto"
+              className="h-5 w-auto object-contain mx-auto"
             />
           </div>
 

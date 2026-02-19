@@ -6,6 +6,8 @@ import { ProductDetailSkeleton } from "@/components/loading-states";
 import { useProducts } from "@/lib/hooks";
 import { useCart } from "@/contexts/CartContext";
 import { getImageUrl, cn } from "@/lib/utils";
+import { SEO } from "@/components/SEO";
+import { generateProductMeta } from "@/lib/seo-config";
 
 export function ProductPage() {
   const { id } = useParams();
@@ -62,6 +64,8 @@ export function ProductPage() {
     });
   };
 
+  const productMeta = product ? generateProductMeta(product) : null;
+
   const ProductCard = ({
     product: p,
   }: {
@@ -101,6 +105,23 @@ export function ProductPage() {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+      {productMeta && (
+        <SEO
+          title={productMeta.title}
+          description={productMeta.description}
+          image={productMeta.image}
+          path={`/product/${product._id}`}
+          product={productMeta.product}
+          breadcrumbs={[
+            { name: "Главная", path: "/" },
+            {
+              name: product.category === "originals" ? "Оригиналы" : "Мерч",
+              path: product.category === "originals" ? "/originals" : "/merch",
+            },
+            { name: product.name, path: `/product/${product._id}` },
+          ]}
+        />
+      )}
       <div className="max-w-[1600px] mx-auto">
         <Link
           to="/"
@@ -123,7 +144,7 @@ export function ProductPage() {
             >
               <img
                 src={getImageUrl(product.images[currentImage])}
-                alt={product.name}
+                alt={`Картина "${product.name}" — Кира SHITSU, Москва`}
                 className={cn(
                   "w-full h-full object-cover transition-transform duration-200",
                   isZoomed && "scale-[2.5]",
@@ -140,7 +161,7 @@ export function ProductPage() {
                 <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-lg">
                   <img
                     src="./headers/sold.png"
-                    alt="Продано"
+                    alt="Картина продана"
                     className="h-8 w-auto object-contain mx-auto"
                   />
                 </div>
@@ -163,7 +184,7 @@ export function ProductPage() {
                   >
                     <img
                       src={getImageUrl(img)}
-                      alt={`${product.name} ${idx + 1}`}
+                      alt={`Картина "${product.name}" — фото ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </Button>

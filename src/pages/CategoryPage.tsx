@@ -2,6 +2,7 @@ import { useProducts, type Category } from "@/lib/hooks";
 import { ProductGridSkeleton } from "@/components/loading-states";
 import { ProductCard } from "@/components/ProductCard";
 import { HeaderImage } from "@/components/HeaderImage";
+import { SEO } from "@/components/SEO";
 
 interface CategoryPageProps {
   category?: string;
@@ -27,8 +28,16 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
 
   const categoryProducts = products;
 
+  const seoPage =
+    category === "originals"
+      ? "originals"
+      : category === "merch"
+        ? "merch"
+        : "archive";
+
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+      <SEO page={seoPage} />
       <div className="max-w-[1600px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
