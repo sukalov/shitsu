@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useProducts, type Category } from "@/lib/hooks";
 import { ProductGridSkeleton } from "@/components/loading-states";
 import { ProductCard } from "@/components/ProductCard";
@@ -12,35 +11,14 @@ interface CategoryPageProps {
 }
 
 export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
-  const [headerLoaded, setHeaderLoaded] = useState(false);
   const products = useProducts(category as Category, isSold);
 
-  const imageSrc =
-    category === "originals"
-      ? "./headers/originals.webp"
-      : category === "merch"
-        ? "./headers/merch.webp"
-        : "./headers/archive.webp";
-
-  const seoPage =
-    category === "originals"
-      ? "originals"
-      : category === "merch"
-        ? "merch"
-        : "archive";
-
-  if (!products || !headerLoaded) {
+  if (!products) {
     return (
       <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
-        <SEO page={seoPage} />
         <div className="max-w-[1600px] mx-auto">
           <div className="text-center mb-20">
-            <HeaderImage
-              src={imageSrc}
-              alt={title}
-              className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
-              onLoadComplete={() => setHeaderLoaded(true)}
-            />
+            <div className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6 bg-neutral-100 animate-pulse w-48" />
           </div>
           <ProductGridSkeleton count={8} />
         </div>
@@ -50,16 +28,28 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
 
   const categoryProducts = products;
 
+  const seoPage =
+    category === "originals"
+      ? "originals"
+      : category === "merch"
+        ? "merch"
+        : "archive";
+
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <SEO page={seoPage} />
       <div className="max-w-[1600px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src={imageSrc}
+            src={
+              category === "originals"
+                ? "./headers/originals.png"
+                : category === "merch"
+                  ? "./headers/merch.png"
+                  : "./headers/archive.png"
+            }
             alt={title}
-            className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
-            onLoadComplete={() => setHeaderLoaded(true)}
+            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             {title}

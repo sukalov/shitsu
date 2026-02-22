@@ -22,7 +22,6 @@ const socialLinks = [
 ];
 
 export function AboutPage() {
-  const [headerLoaded, setHeaderLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -53,22 +52,6 @@ export function AboutPage() {
   const stickerRotate = -15 + stickerProgress * 15;
   const stickerScale = 0.8 + stickerProgress * 0.2;
 
-  if (!headerLoaded) {
-    return (
-      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
-        <SEO page="about" />
-        <div className="max-w-[900px] mx-auto text-center">
-          <HeaderImage
-            src="./headers/about.webp"
-            alt="Обо мне"
-            className="h-12 lg:h-16 w-auto object-contain mb-12 mx-auto"
-            onLoadComplete={() => setHeaderLoaded(true)}
-          />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={sectionRef}
@@ -96,10 +79,9 @@ export function AboutPage() {
 
       <div className="max-w-[900px] mx-auto px-6 lg:px-12 relative z-0">
         <HeaderImage
-          src="./headers/about.webp"
+          src="./headers/about.png"
           alt="Обо мне"
-          className="h-12 lg:h-16 w-auto object-contain mb-12 mx-auto"
-          onLoadComplete={() => setHeaderLoaded(true)}
+          className="h-14 lg:h-20 w-auto object-contain mb-12 mx-auto"
         />
         <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase mb-12">
           Обо мне
