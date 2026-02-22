@@ -11,9 +11,11 @@
     "build": "tsc -b && vite build",
     "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "deploy": "bunx convex deploy --yes",
     "seo:check": "echo 'Run these SEO checks after deployment: 1) Verify robots.txt at /robots.txt 2) Verify sitemap at /sitemap.xml 3) Test meta tags with SEO tools 4) Submit sitemap to Yandex.Webmaster'"
   },
   "dependencies": {
+    "@auth/core": "^0.37.0",
     "@base-ui/react": "^1.1.0",
     "@convex-dev/auth": "^0.0.90",
     "@fontsource-variable/figtree": "^5.2.10",
