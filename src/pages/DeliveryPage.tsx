@@ -1,17 +1,39 @@
+import { useState } from "react";
 import { Package, CreditCard, ArrowsClockwise } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
 import { SEO } from "@/components/SEO";
 
 export function DeliveryPage() {
+  const [headerLoaded, setHeaderLoaded] = useState(false);
+
+  if (!headerLoaded) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <SEO page="delivery" />
+        <div className="max-w-[900px] mx-auto">
+          <div className="text-center mb-20">
+            <HeaderImage
+              src="./headers/delivery.webp"
+              alt="Доставка и оплата"
+              className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
+              onLoadComplete={() => setHeaderLoaded(true)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <SEO page="delivery" />
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/delivery.png"
+            src="./headers/delivery.webp"
             alt="Доставка и оплата"
-            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+            className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
+            onLoadComplete={() => setHeaderLoaded(true)}
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Доставка и оплата
@@ -86,7 +108,7 @@ export function DeliveryPage() {
               </div>
               <div className="flex-shrink-0">
                 <img
-                  src="./headers/returns.png"
+                  src="./headers/returns.webp"
                   alt="Возврат"
                   className="h-24 w-auto object-contain"
                 />

@@ -13,6 +13,7 @@ import { createTelegramLink } from "@/lib/telegram";
 import { SEO } from "@/components/SEO";
 
 export function CustomPage() {
+  const [headerLoaded, setHeaderLoaded] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     concept: "",
@@ -23,16 +24,36 @@ export function CustomPage() {
     setSubmitted(true);
   };
 
+  if (!headerLoaded) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <SEO page="custom" />
+        <div className="max-w-[1000px] mx-auto">
+          <div className="text-center mb-20">
+            <HeaderImage
+              src="./headers/custom-order.webp"
+              alt="Индивидуальный заказ"
+              className="h-12 lg:h-16 w-auto mx-auto mb-6 block"
+              style={{ maxWidth: "100%", minWidth: "200px" }}
+              onLoadComplete={() => setHeaderLoaded(true)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <SEO page="custom" />
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/custom-order.png"
+            src="./headers/custom-order.webp"
             alt="Индивидуальный заказ"
-            className="h-16 lg:h-24 w-auto mx-auto mb-6 block"
+            className="h-12 lg:h-16 w-auto mx-auto mb-6 block"
             style={{ maxWidth: "100%", minWidth: "200px" }}
+            onLoadComplete={() => setHeaderLoaded(true)}
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Индивидуальный заказ

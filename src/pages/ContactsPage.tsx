@@ -1,18 +1,40 @@
+import { useState } from "react";
 import { MapPin, Envelope } from "@phosphor-icons/react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
 import { SEO } from "@/components/SEO";
 
 export function ContactsPage() {
+  const [headerLoaded, setHeaderLoaded] = useState(false);
+
+  if (!headerLoaded) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+        <SEO page="contacts" />
+        <div className="max-w-[1000px] mx-auto">
+          <div className="text-center mb-20">
+            <HeaderImage
+              src="./headers/contacts.webp"
+              alt="Контакты"
+              className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
+              onLoadComplete={() => setHeaderLoaded(true)}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
       <SEO page="contacts" />
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/contacts.png"
+            src="./headers/contacts.webp"
             alt="Контакты"
-            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+            className="h-12 lg:h-16 w-auto object-contain mx-auto mb-6"
+            onLoadComplete={() => setHeaderLoaded(true)}
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Контакты
