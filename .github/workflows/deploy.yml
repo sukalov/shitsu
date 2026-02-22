@@ -34,6 +34,7 @@ jobs:
         run: bun run build
         env:
           VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL }}
+          VITE_CONVEX_SITE_URL: ${{ secrets.VITE_CONVEX_SITE_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
