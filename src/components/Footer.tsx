@@ -33,7 +33,7 @@ export function Footer() {
               />
             </Link>
             <img
-              src="./headers/name.png"
+              src="./headers/name.webp"
               alt=""
               className="h-5 w-auto object-contain mx-auto"
             />

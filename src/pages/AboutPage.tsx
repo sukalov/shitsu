@@ -79,7 +79,7 @@ export function AboutPage() {
 
       <div className="max-w-[900px] mx-auto px-6 lg:px-12 relative z-0">
         <HeaderImage
-          src="./headers/about.png"
+          src="./headers/about.webp"
           alt="Обо мне"
           className="h-14 lg:h-20 w-auto object-contain mb-12 mx-auto"
         />

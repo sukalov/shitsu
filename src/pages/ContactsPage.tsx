@@ -10,7 +10,7 @@ export function ContactsPage() {
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/contacts.png"
+            src="./headers/contacts.webp"
             alt="Контакты"
             className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
           />

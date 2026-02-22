@@ -9,7 +9,7 @@ export function DeliveryPage() {
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/delivery.png"
+            src="./headers/delivery.webp"
             alt="Доставка и оплата"
             className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
           />
@@ -86,7 +86,7 @@ export function DeliveryPage() {
               </div>
               <div className="flex-shrink-0">
                 <img
-                  src="./headers/returns.png"
+                  src="./headers/returns.webp"
                   alt="Возврат"
                   className="h-24 w-auto object-contain"
                 />
