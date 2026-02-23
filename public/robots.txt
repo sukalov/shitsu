@@ -1,8 +1,8 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shitsu.art/sitemap.xml
-Host: https://shitsu.art
+Sitemap: https://shitsukira.ru/sitemap.xml
+Host: https://shitsukira.ru
 
 User-agent: Yandex
 Allow: /

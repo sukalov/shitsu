@@ -19,7 +19,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <HelmetProvider>
       <ConvexAuthProvider client={convex}>
-        <BrowserRouter basename="/shitsu">
+        <BrowserRouter>
           <App />
         </BrowserRouter>
       </ConvexAuthProvider>

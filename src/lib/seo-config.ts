@@ -5,7 +5,7 @@ export const SITE_CONFIG = {
   tagline: "Художница из Москвы",
   description:
     "SHITSU — художница Кира из Москвы. Оригинальные картины, мерч и картины на заказ. Японская эстетика, современная живопись.",
-  url: "https://shitsu.art",
+  url: "https://shitsukira.ru",
   locale: "ru_RU",
   language: "ru",
   region: "RU-MOW",
