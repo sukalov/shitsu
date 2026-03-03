@@ -70,6 +70,8 @@ export function AdminProducts() {
     Record<string, { width: number; height: number }>
   >({});
   const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
+  const [draggedImageIndex, setDraggedImageIndex] = useState<number | null>(null);
+  const [dragOverImageIndex, setDragOverImageIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getCropWarning = (imageId: string) => {
@@ -221,6 +223,46 @@ export function AdminProducts() {
     });
   };
 
+  const reorderImages = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setFormData((prev) => {
+      const nextImages = [...prev.images];
+      const [moved] = nextImages.splice(fromIndex, 1);
+      if (!moved) return prev;
+      nextImages.splice(toIndex, 0, moved);
+      return { ...prev, images: nextImages };
+    });
+  };
+
+  const handleDragStart = (index: number, e: React.DragEvent<HTMLDivElement>) => {
+    setDraggedImageIndex(index);
+    setDragOverImageIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleDragEnter = (index: number) => {
+    setDragOverImageIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (index: number, e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (draggedImageIndex === null) return;
+    reorderImages(draggedImageIndex, index);
+    setDraggedImageIndex(null);
+    setDragOverImageIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedImageIndex(null);
+    setDragOverImageIndex(null);
+  };
+
   if (isEditing) {
     return (
       <div>
@@ -329,20 +371,43 @@ export function AdminProducts() {
             <p className="text-xs text-neutral-500">
               Для витрины без обрезки используйте формат 4:5 (например 1600x2000).
             </p>
+            <p className="text-xs text-neutral-500">
+              Перетаскивайте карточки, чтобы изменить порядок изображений.
+            </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
               {formData.images.map((img, idx) => {
                 const cropWarning = getCropWarning(img);
+                const isDropTarget = dragOverImageIndex === idx;
+                const isDragging = draggedImageIndex === idx;
 
                 return (
-                  <div key={`${img}-${idx}`} className="group">
+                  <div
+                    key={`${img}-${idx}`}
+                    className={cn(
+                      "group rounded-md transition-colors",
+                      isDropTarget && !isDragging && "ring-2 ring-neutral-900/60 ring-offset-2",
+                    )}
+                    draggable
+                    onDragStart={(e) => handleDragStart(idx, e)}
+                    onDragEnter={() => handleDragEnter(idx)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(idx, e)}
+                    onDragEnd={handleDragEnd}
+                  >
                     <div className="relative">
                       <img
                         src={getImageUrl(img)}
                         alt={`Image ${idx + 1}`}
-                        className="w-full aspect-[4/5] object-cover bg-neutral-100"
+                        className={cn(
+                          "w-full aspect-[4/5] object-cover bg-neutral-100",
+                          isDragging && "opacity-60",
+                        )}
                         onLoad={(e) => handlePreviewImageLoad(img, e)}
                         onError={() => handlePreviewImageError(img)}
                       />
+                      <div className="absolute top-1 left-1 bg-white/90 px-1.5 py-0.5 text-[10px] text-neutral-700">
+                        #{idx + 1}
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeImage(idx, img)}
