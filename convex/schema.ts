@@ -9,7 +9,6 @@ export default defineSchema({
     name: v.string(),
     price: v.number(),
     category: v.union(v.literal("originals"), v.literal("merch")),
-    subcategory: v.optional(v.string()),
     images: v.array(v.string()),
     description: v.string(),
     isSold: v.boolean(),

@@ -28,7 +28,6 @@ interface ProductFormData {
   name: string;
   price: number;
   category: Category;
-  subcategory: string;
   images: string[];
   description: string;
   isSold: boolean;
@@ -39,7 +38,6 @@ const emptyForm: ProductFormData = {
   name: "",
   price: 0,
   category: "merch",
-  subcategory: "",
   images: [],
   description: "",
   isSold: false,
@@ -108,7 +106,6 @@ export function AdminProducts() {
       name: product.name,
       price: product.price,
       category: product.category,
-      subcategory: product.subcategory || "",
       images: product.images,
       description: product.description,
       isSold: product.isSold,
@@ -137,7 +134,6 @@ export function AdminProducts() {
         name: formData.name,
         price: formData.price,
         category: formData.category,
-        subcategory: formData.subcategory || undefined,
         images: formData.images,
         description: formData.description,
         isSold: formData.isSold,
@@ -222,18 +218,6 @@ export function AdminProducts() {
                 <SelectItem value="merch">Мерч</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="subcategory">Подкатегория</Label>
-            <Input
-              id="subcategory"
-              value={formData.subcategory}
-              onChange={(e) =>
-                setFormData({ ...formData, subcategory: e.target.value })
-              }
-              placeholder="Принты, Одежда, Аксессуары"
-            />
           </div>
 
           <div className="space-y-2">
