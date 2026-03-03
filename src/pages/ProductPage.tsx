@@ -52,6 +52,8 @@ export function ProductPage() {
       !p.isSold &&
       !(product.seriesId && p.seriesId === product.seriesId),
   );
+  const relatedTitle =
+    product.category === "merch" ? "Другой мерч" : "Другие оригиналы";
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!imageContainerRef.current) return;
@@ -257,7 +259,7 @@ export function ProductPage() {
         {relatedProducts.length > 0 && (
           <div className="mt-24">
             <h2 className="text-sm text-neutral-500 mb-12 uppercase tracking-[0.15em]">
-              Похожие работы
+              {relatedTitle}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.slice(0, 4).map((p) => (
