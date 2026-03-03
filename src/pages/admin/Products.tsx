@@ -20,7 +20,14 @@ import {
   type Category,
 } from "@/lib/hooks";
 import { Id } from "../../../convex/_generated/dataModel";
-import { Trash, Pencil, Plus, X, Upload } from "@phosphor-icons/react";
+import {
+  Trash,
+  Pencil,
+  Plus,
+  X,
+  Upload,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { cn, getImageUrl } from "@/lib/utils";
 import { AdminTableSkeleton } from "@/components/loading-states";
 
@@ -44,6 +51,9 @@ const emptyForm: ProductFormData = {
   seriesId: "",
 };
 
+const PRODUCT_PAGE_IMAGE_RATIO = 4 / 5;
+const IMAGE_RATIO_TOLERANCE = 0.01;
+
 export function AdminProducts() {
   const products = useProducts();
   const createProduct = useCreateProduct();
@@ -56,7 +66,43 @@ export function AdminProducts() {
   const [formData, setFormData] = useState<ProductFormData>(emptyForm);
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
+  const [imageLoadErrors, setImageLoadErrors] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getCropWarning = (imageId: string) => {
+    const dimensions = imageDimensions[imageId];
+    if (!dimensions || dimensions.height === 0) return null;
+
+    const imageRatio = dimensions.width / dimensions.height;
+    if (Math.abs(imageRatio - PRODUCT_PAGE_IMAGE_RATIO) <= IMAGE_RATIO_TOLERANCE) {
+      return null;
+    }
+
+    if (imageRatio > PRODUCT_PAGE_IMAGE_RATIO) {
+      return "Будет обрезано по бокам в формате 4:5";
+    }
+
+    return "Будет обрезано сверху и снизу в формате 4:5";
+  };
+
+  const handlePreviewImageLoad = (
+    imageId: string,
+    e: React.SyntheticEvent<HTMLImageElement>,
+  ) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    setImageDimensions((prev) => ({
+      ...prev,
+      [imageId]: { width: naturalWidth, height: naturalHeight },
+    }));
+    setImageLoadErrors((prev) => ({ ...prev, [imageId]: false }));
+  };
+
+  const handlePreviewImageError = (imageId: string) => {
+    setImageLoadErrors((prev) => ({ ...prev, [imageId]: true }));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -102,6 +148,8 @@ export function AdminProducts() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
+    setImageDimensions({});
+    setImageLoadErrors({});
     setFormData({
       name: product.name,
       price: product.price,
@@ -116,6 +164,8 @@ export function AdminProducts() {
 
   const handleCreate = () => {
     setEditingProduct(null);
+    setImageDimensions({});
+    setImageLoadErrors({});
     setFormData(emptyForm);
     setIsEditing(true);
   };
@@ -149,15 +199,25 @@ export function AdminProducts() {
       setIsEditing(false);
       setEditingProduct(null);
       setFormData(emptyForm);
+      setImageDimensions({});
+      setImageLoadErrors({});
     };
 
     void doSubmit();
   };
 
-  const removeImage = (index: number) => {
+  const removeImage = (index: number, imageId: string) => {
     setFormData({
       ...formData,
       images: formData.images.filter((_, i) => i !== index),
+    });
+    setImageDimensions((prev) => {
+      const { [imageId]: _removed, ...rest } = prev;
+      return rest;
+    });
+    setImageLoadErrors((prev) => {
+      const { [imageId]: _removed, ...rest } = prev;
+      return rest;
     });
   };
 
@@ -266,23 +326,55 @@ export function AdminProducts() {
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
-            <div className="grid grid-cols-4 gap-4 mt-4">
-              {formData.images.map((img, idx) => (
-                <div key={idx} className="relative group">
-                  <img
-                    src={getImageUrl(img)}
-                    alt={`Image ${idx + 1}`}
-                    className="w-full h-24 object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeImage(idx)}
-                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+            <p className="text-xs text-neutral-500">
+              Для витрины без обрезки используйте формат 4:5 (например 1600x2000).
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+              {formData.images.map((img, idx) => {
+                const cropWarning = getCropWarning(img);
+
+                return (
+                  <div key={`${img}-${idx}`} className="group">
+                    <div className="relative">
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`Image ${idx + 1}`}
+                        className="w-full aspect-[4/5] object-cover bg-neutral-100"
+                        onLoad={(e) => handlePreviewImageLoad(img, e)}
+                        onError={() => handlePreviewImageError(img)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx, img)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="mt-1 space-y-0.5">
+                      {imageLoadErrors[img] ? (
+                        <p className="text-[11px] text-red-600">
+                          Не удалось загрузить размер
+                        </p>
+                      ) : imageDimensions[img] ? (
+                        <p className="text-[11px] text-neutral-600">
+                          {imageDimensions[img].width}x{imageDimensions[img].height}
+                        </p>
+                      ) : (
+                        <p className="text-[11px] text-neutral-400">
+                          Определяем размер...
+                        </p>
+                      )}
+                      {cropWarning && (
+                        <p className="flex items-center gap-1 text-[11px] text-amber-700">
+                          <WarningCircle className="h-3 w-3 flex-shrink-0" />
+                          {cropWarning}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
