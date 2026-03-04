@@ -1,6 +1,5 @@
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { getImageUrl } from "@/lib/utils";
+import { useEffect, useState } from "react";
+import { cn, getImageUrl, preloadImage } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductImageProps {
@@ -9,6 +8,7 @@ interface ProductImageProps {
   className?: string;
   aspectRatio?: "3/4" | "4/5" | "1/1" | "auto";
   showSkeleton?: boolean;
+  priority?: boolean;
 }
 
 function ProductImage({
@@ -17,9 +17,17 @@ function ProductImage({
   className,
   aspectRatio = "auto",
   showSkeleton = true,
+  priority = false,
 }: ProductImageProps) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    const url = hasError
+      ? "https://placehold.co/400x400?text=No+Image"
+      : getImageUrl(src);
+    preloadImage(url);
+  }, [src, hasError]);
 
   const aspectRatioClasses = {
     "3/4": "aspect-[3/4]",
@@ -29,11 +37,11 @@ function ProductImage({
   };
 
   const handleLoad = () => {
-    setIsLoading(false);
+    setIsLoaded(true);
   };
 
   const handleError = () => {
-    setIsLoading(false);
+    setIsLoaded(true);
     setHasError(true);
   };
 
@@ -47,16 +55,16 @@ function ProductImage({
         className,
       )}
     >
-      {showSkeleton && isLoading && <Skeleton className="absolute inset-0" />}
+      {showSkeleton && !isLoaded && <Skeleton className="absolute inset-0" />}
       <img
         src={hasError ? fallbackSrc : getImageUrl(src)}
         alt={alt}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
         onLoad={handleLoad}
         onError={handleError}
         className={cn(
           "w-full h-full object-cover transition-all duration-500",
-          isLoading ? "opacity-0 blur-sm" : "opacity-100 blur-0",
+          isLoaded ? "opacity-100 blur-0" : "opacity-0 blur-sm",
         )}
       />
     </div>
