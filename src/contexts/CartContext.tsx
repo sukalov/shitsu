@@ -13,9 +13,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (product: Product) => {
     const productId = product._id.toString();
+    const isOriginal = product.category === "originals";
+
     setItems((current) => {
       const existing = current.find((item) => item._id === productId);
       if (existing) {
+        if (isOriginal) return current;
         return current.map((item) =>
           item._id === productId
             ? { ...item, quantity: item.quantity + 1 }
@@ -30,6 +33,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           price: product.price,
           quantity: 1,
           images: product.images,
+          category: product.category,
         },
       ];
     });
@@ -41,9 +45,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
+    const item = items.find((i) => i._id === productId);
+    const isOriginal = item?.category === "originals";
+
     if (quantity <= 0) {
       removeItem(productId);
       return;
+    }
+    if (isOriginal && quantity > 1) {
+      quantity = 1;
     }
     setItems((current) =>
       current.map((item) =>
