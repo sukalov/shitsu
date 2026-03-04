@@ -229,15 +229,7 @@ export function ProductPage() {
               </div>
 
               <div className="pt-4">
-                {product.isSold ? (
-                  <Button
-                    disabled
-                    className="w-full uppercase tracking-[0.1em]"
-                    size="lg"
-                  >
-                    Продано
-                  </Button>
-                ) : (
+                {!product.isSold && (
                   <Button
                     onClick={() => addItem(product)}
                     className="w-full uppercase tracking-[0.1em]"
