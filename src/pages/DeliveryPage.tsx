@@ -8,11 +8,18 @@ export function DeliveryPage() {
       <SEO page="delivery" />
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
-          <HeaderImage
-            src="./headers/delivery.webp"
-            alt="Доставка и оплата"
-            className="w-full h-14 lg:h-20 object-contain mx-auto mb-6"
-          />
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-6">
+            <HeaderImage
+              src="./headers/delivery.webp"
+              alt="Доставка и оплата"
+              className="w-full md:w-auto h-14 lg:h-20 object-contain"
+            />
+            <HeaderImage
+              src="./headers/returns.webp"
+              alt="Возврат"
+              className="w-full md:w-auto h-14 lg:h-20 object-contain"
+            />
+          </div>
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Доставка и оплата
           </h1>
@@ -67,31 +74,20 @@ export function DeliveryPage() {
           </div>
 
           <div className="bg-neutral-50 p-10">
-            <div className="flex flex-col md:flex-row gap-8">
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-6">
-                  <ArrowsClockwise
-                    className="w-8 h-8 text-neutral-400"
-                    weight="light"
-                  />
-                  <h2 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
-                    Возврат
-                  </h2>
-                </div>
-                <p className="text-neutral-600 leading-relaxed">
-                  Возврат возможен в течение 14 дней с момента получения заказа.
-                  Товар должен быть в оригинальном состоянии. Стоимость обратной
-                  доставки оплачивается покупателем.
-                </p>
-              </div>
-              <div className="flex-shrink-0">
-                <img
-                  src="./headers/returns.webp"
-                  alt="Возврат"
-                  className="w-full max-w-[320px] h-24 object-contain"
-                />
-              </div>
+            <div className="flex items-center gap-4 mb-6">
+              <ArrowsClockwise
+                className="w-8 h-8 text-neutral-400"
+                weight="light"
+              />
+              <h2 className="text-xs uppercase tracking-[0.15em] text-neutral-500">
+                Возврат
+              </h2>
             </div>
+            <p className="text-neutral-600 leading-relaxed">
+              Возврат возможен в течение 14 дней с момента получения заказа.
+              Товар должен быть в оригинальном состоянии. Стоимость обратной
+              доставки оплачивается покупателем.
+            </p>
           </div>
         </div>
       </div>
