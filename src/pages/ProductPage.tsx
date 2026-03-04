@@ -239,12 +239,6 @@ export function ProductPage() {
                   </Button>
                 )}
               </div>
-
-              <div className="pt-6 text-xs text-neutral-500 leading-relaxed">
-                {!product.isSold && (
-                  <p>Доставка рассчитывается индивидуально.</p>
-                )}
-              </div>
             </div>
           </div>
         </div>

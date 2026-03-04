@@ -288,9 +288,6 @@ export function CartSidebar() {
             >
               Оформить заказ
             </Button>
-            <p className="text-xs text-neutral-400 text-center">
-              Доставка рассчитывается при оформлении
-            </p>
           </div>
         )}
       </SheetContent>
