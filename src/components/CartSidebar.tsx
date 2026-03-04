@@ -225,29 +225,33 @@ export function CartSidebar() {
                         {item.price.toLocaleString("ru-RU")} ₽
                       </p>
                       <div className="flex items-center gap-3">
-                        <Button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity - 1)
-                          }
-                          variant="outline"
-                          size="icon-sm"
-                          className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </Button>
-                        <span className="text-sm w-8 text-center">
-                          {item.quantity}
-                        </span>
-                        <Button
-                          onClick={() =>
-                            updateQuantity(item._id, item.quantity + 1)
-                          }
-                          variant="outline"
-                          size="icon-sm"
-                          className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </Button>
+                        {item.category !== "originals" && (
+                          <>
+                            <Button
+                              onClick={() =>
+                                updateQuantity(item._id, item.quantity - 1)
+                              }
+                              variant="outline"
+                              size="icon-sm"
+                              className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </Button>
+                            <span className="text-sm w-8 text-center">
+                              {item.quantity}
+                            </span>
+                            <Button
+                              onClick={() =>
+                                updateQuantity(item._id, item.quantity + 1)
+                              }
+                              variant="outline"
+                              size="icon-sm"
+                              className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                     <Button
