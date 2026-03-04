@@ -1,11 +1,15 @@
-import { createContext, useContext, useState } from "react";
-import type { Product, CartItem, CartContextType } from "@/lib/types";
+import { createContext, useContext } from "react";
+import { atom, useAtom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
+import type { CartItem, CartContextType, Product } from "@/lib/types";
 
-const CartContext = createContext<CartContextType | null>(null);
+const cartItemsAtom = atomWithStorage<CartItem[]>("shitsu-cart", []);
+
+const isOpenAtom = atom(false);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [items, setItems] = useAtom(cartItemsAtom);
+  const [isOpen, setIsOpen] = useAtom(isOpenAtom);
 
   const addItem = (product: Product) => {
     const productId = product._id.toString();
@@ -72,6 +76,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     </CartContext.Provider>
   );
 }
+
+const CartContext = createContext<CartContextType | null>(null);
 
 export function useCart() {
   const context = useContext(CartContext);
