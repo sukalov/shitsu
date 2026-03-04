@@ -150,14 +150,6 @@ export function CartSidebar() {
                     {total.toLocaleString("ru-RU")} ₽
                   </span>
                 </div>
-                <div className="flex justify-between text-sm text-neutral-500">
-                  <span className="text-xs uppercase tracking-[0.1em]">
-                    Доставка
-                  </span>
-                  <span className="text-xs uppercase tracking-[0.1em]">
-                    Рассчитается
-                  </span>
-                </div>
                 <div className="flex justify-between text-xl pt-3 border-t border-neutral-200">
                   <span className="text-xs uppercase tracking-[0.1em]">
                     Итого
