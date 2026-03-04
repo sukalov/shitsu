@@ -8,7 +8,7 @@ export function DeliveryPage() {
       <SEO page="delivery" />
       <div className="max-w-[900px] mx-auto">
         <div className="text-center mb-20">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 mb-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-0 mb-6">
             <HeaderImage
               src="./headers/delivery.webp"
               alt="Доставка и оплата"
