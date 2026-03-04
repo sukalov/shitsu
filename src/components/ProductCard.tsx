@@ -29,11 +29,11 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
             aspectRatio={featured ? "3/4" : "4/5"}
           />
           {product.isSold && (
-            <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-3 py-2 shadow-lg">
+            <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-3 py-4 shadow-lg">
               <img
                 src="./headers/sold.webp"
                 alt="Картина продана"
-                className="h-12 w-full object-contain"
+                className="h-24 w-full object-contain"
               />
             </div>
           )}
