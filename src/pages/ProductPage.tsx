@@ -250,7 +250,9 @@ export function ProductPage() {
               </div>
 
               <div className="pt-6 text-xs text-neutral-500 leading-relaxed">
-                <p>Доставка рассчитывается индивидуально.</p>
+                {!product.isSold && (
+                  <p>Доставка рассчитывается индивидуально.</p>
+                )}
               </div>
             </div>
           </div>
