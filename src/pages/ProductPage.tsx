@@ -219,14 +219,13 @@ export function ProductPage() {
                 </div>
               )}
 
-              <div>
-                <h3 className="text-xs mb-4 uppercase tracking-[0.15em] text-neutral-500">
-                  О работе
-                </h3>
-                <p className="text-neutral-600 leading-relaxed">
-                  {product.description}
-                </p>
-              </div>
+              {product.description && (
+                <div>
+                  <p className="text-neutral-600 leading-relaxed">
+                    {product.description}
+                  </p>
+                </div>
+              )}
 
               <div className="pt-4">
                 {!product.isSold && (
