@@ -24,10 +24,12 @@ export const listProducts = query({
   handler: async (ctx, args) => {
     let products = await ctx.db.query("products").order("desc").collect();
 
+    if (args.category) {
+      products = products.filter((p) => p.category === args.category);
+    }
+
     if (args.isSold !== undefined) {
       products = products.filter((p) => p.isSold === args.isSold);
-    } else if (args.category) {
-      products = products.filter((p) => p.category === args.category);
     }
 
     return products;

@@ -11,7 +11,7 @@ export function DeliveryPage() {
           <HeaderImage
             src="./headers/delivery.webp"
             alt="Доставка и оплата"
-            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+            className="w-full h-14 lg:h-20 object-contain mx-auto mb-6"
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Доставка и оплата
@@ -88,7 +88,7 @@ export function DeliveryPage() {
                 <img
                   src="./headers/returns.webp"
                   alt="Возврат"
-                  className="h-24 w-auto object-contain"
+                  className="w-full max-w-[320px] h-24 object-contain"
                 />
               </div>
             </div>

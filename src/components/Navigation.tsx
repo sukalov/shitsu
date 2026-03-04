@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { label: "Оригиналы", href: "/originals" },
   { label: "Мерч", href: "/merch" },
-  { label: "Индивидуальный заказ", href: "/custom" },
+  { label: "Индивидуальный", href: "/custom" },
   { label: "Архив", href: "/archive" },
   { label: "О себе", href: "/about" },
   { label: "Контакты", href: "/contacts" },

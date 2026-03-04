@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { SEO } from "@/components/SEO";
 
 export function HomePage() {
-  const products = useProducts();
+  const products = useProducts(undefined, false);
 
   if (!products) {
     return (
@@ -17,7 +17,7 @@ export function HomePage() {
   }
 
   const collectionProducts = products.filter(
-    (p) => (p.category === "originals" || p.category === "merch") && !p.isSold,
+    (p) => p.category === "originals" || p.category === "merch",
   );
 
   return (

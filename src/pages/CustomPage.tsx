@@ -31,8 +31,7 @@ export function CustomPage() {
           <HeaderImage
             src="./headers/custom-order.webp"
             alt="Индивидуальный заказ"
-            className="h-16 lg:h-24 w-auto mx-auto mb-6 block"
-            style={{ maxWidth: "100%", minWidth: "200px" }}
+            className="w-full h-16 lg:h-24 object-contain mx-auto mb-6 block"
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Индивидуальный заказ

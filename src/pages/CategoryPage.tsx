@@ -11,14 +11,14 @@ interface CategoryPageProps {
 }
 
 export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
-  const products = useProducts(category as Category, isSold);
+  const products = useProducts(category as Category, isSold ?? false);
 
   if (!products) {
     return (
       <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
           <div className="text-center mb-20">
-            <div className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6 bg-neutral-100 animate-pulse w-48" />
+            <div className="w-full h-14 lg:h-20 object-contain mx-auto mb-6 bg-neutral-100 animate-pulse" />
           </div>
           <ProductGridSkeleton count={8} />
         </div>
@@ -49,7 +49,7 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
                   : "./headers/archive.webp"
             }
             alt={title}
-            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+            className="w-full h-14 lg:h-20 object-contain mx-auto mb-6"
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             {title}

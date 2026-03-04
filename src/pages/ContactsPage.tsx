@@ -12,7 +12,7 @@ export function ContactsPage() {
           <HeaderImage
             src="./headers/contacts.webp"
             alt="Контакты"
-            className="h-14 lg:h-20 w-auto object-contain mx-auto mb-6"
+            className="w-full h-14 lg:h-20 object-contain mx-auto mb-6"
           />
           <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
             Контакты

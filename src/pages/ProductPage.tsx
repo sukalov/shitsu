@@ -87,11 +87,11 @@ export function ProductPage() {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         {p.isSold && (
-          <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-sm px-1.5 py-0.5">
+          <div className="absolute bottom-1.5 inset-x-0 bg-white/80 backdrop-blur-sm px-1 py-0.5">
             <img
               src="./headers/sold.webp"
               alt="Продано"
-              className="h-3 w-auto object-contain"
+              className="h-3 w-full object-contain"
             />
           </div>
         )}
@@ -160,11 +160,11 @@ export function ProductPage() {
                 }
               />
               {product.isSold && (
-                <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-lg">
+                <div className="absolute bottom-1.5 inset-x-0 bg-white/80 backdrop-blur-sm px-4 py-3 shadow-lg">
                   <img
                     src="./headers/sold.webp"
                     alt="Картина продана"
-                    className="h-8 w-auto object-contain mx-auto"
+                    className="h-8 w-full object-contain mx-auto"
                   />
                 </div>
               )}

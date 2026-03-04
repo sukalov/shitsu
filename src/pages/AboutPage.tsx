@@ -81,7 +81,7 @@ export function AboutPage() {
         <HeaderImage
           src="./headers/about.webp"
           alt="Обо мне"
-          className="h-14 lg:h-20 w-auto object-contain mb-12 mx-auto"
+          className="w-full h-14 lg:h-20 object-contain mb-12 mx-auto"
         />
         <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase mb-12">
           Обо мне
