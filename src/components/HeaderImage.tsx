@@ -11,7 +11,9 @@ export function HeaderImage({ src, alt, className, style }: HeaderImageProps) {
       src={src}
       alt={alt}
       className={className}
-      style={style}
+      style={{ backgroundColor: "transparent", ...style }}
+      decoding="async"
+      loading="eager"
       onError={(e) => {
         const target = e.currentTarget;
         target.style.display = "none";

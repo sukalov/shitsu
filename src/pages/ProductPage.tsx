@@ -85,6 +85,7 @@ export function ProductPage() {
           src={getImageUrl(p.images[0])}
           alt={p.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
         />
         {p.isSold && (
           <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-1 py-1">
@@ -188,6 +189,7 @@ export function ProductPage() {
                       src={getImageUrl(img)}
                       alt={`Картина "${product.name}" — фото ${idx + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </Button>
                 ))}

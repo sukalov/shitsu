@@ -215,6 +215,7 @@ export function CartSidebar() {
                         src={getImageUrl(item.images[0])}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
