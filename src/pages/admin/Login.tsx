@@ -3,50 +3,40 @@ import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAdminExists, useSetupAdmin, useLogin } from "@/lib/hooks";
+import { useAdminExists, useSetupAdmin, useLogin, useSetAuth } from "@/lib/hooks";
 
 export function AdminLogin() {
   const navigate = useNavigate();
   const adminExists = useAdminExists();
   const setupAdmin = useSetupAdmin();
   const login = useLogin();
+  const setAuth = useSetAuth();
 
   const [password, setPassword] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    const doSubmit = async () => {
-      try {
-        if (!adminExists) {
-          await setupAdmin({ password });
-          const result = await login({ password });
-          if (result.success) {
-            localStorage.setItem("adminToken", result.token || "");
-            void navigate("/admin/products");
-          }
-        } else {
-          const result = await login({ password });
-          if (result.success) {
-            localStorage.setItem("adminToken", result.token || "");
-            void navigate("/admin/products");
-          } else {
-            setError("Неверный пароль");
-          }
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Произошла ошибка");
-      } finally {
-        setIsLoading(false);
+    try {
+      if (!adminExists) {
+        await setupAdmin({ password });
       }
-    };
-
-    void doSubmit();
+      const result = await login({ password });
+      if (result.success && result.token) {
+        setAuth(result.token);
+        void navigate("/admin/products");
+      } else {
+        setError("Неверный пароль");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Произошла ошибка");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (adminExists === undefined) {
@@ -72,19 +62,6 @@ export function AdminLogin() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {!adminExists && (
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Текущий пароль</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Оставьте пустым при первой настройке"
-              />
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="password">
               {adminExists ? "Пароль" : "Новый пароль"}

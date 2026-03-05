@@ -16,9 +16,8 @@ import {
   useUpdateProduct,
   useDeleteProduct,
   useGenerateUploadUrl,
-  type Product,
-  type Category,
 } from "@/lib/hooks";
+import type { Product, Category } from "@/lib/types";
 import { Id } from "../../../convex/_generated/dataModel";
 import {
   Trash,

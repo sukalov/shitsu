@@ -18,9 +18,3 @@ export function getImageUrl(image: string): string {
   const baseUrl = siteUrl || convexUrl || "https://shitsu.convex.cloud";
   return `${baseUrl}/getImage?storageId=${image}`;
 }
-
-export function preloadImage(src: string): void {
-  if (!src) return;
-  const img = new Image();
-  img.src = src;
-}

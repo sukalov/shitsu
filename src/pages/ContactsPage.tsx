@@ -2,6 +2,14 @@ import { MapPin, Envelope } from "@phosphor-icons/react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
 import { SEO } from "@/components/SEO";
+import { SOCIAL_LINKS } from "@/lib/types";
+import type { ComponentType } from "react";
+
+const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string; weight?: string }>> = {
+  instagram: InstagramLogo,
+  tiktok: TiktokLogo,
+  telegram: TelegramLogo,
+};
 
 export function ContactsPage() {
   return (
@@ -38,53 +46,28 @@ export function ContactsPage() {
             <p className="text-xl">shitsu2319@gmail.com</p>
           </a>
 
-          <a
-            href="https://instagram.com/shitsu_kira"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
-          >
-            <InstagramLogo
-              className="w-8 h-8 text-neutral-400 mb-6"
-              weight="light"
-            />
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
-              Instagram
-            </p>
-            <p className="text-xl">@shitsu_kira</p>
-          </a>
-
-          <a
-            href="https://www.tiktok.com/@_shitsu"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
-          >
-            <TiktokLogo
-              className="w-8 h-8 text-neutral-400 mb-6"
-              weight="light"
-            />
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
-              TikTok
-            </p>
-            <p className="text-xl">@_shitsu</p>
-          </a>
-
-          <a
-            href="https://t.me/shitsu_art"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
-          >
-            <TelegramLogo
-              className="w-8 h-8 text-neutral-400 mb-6"
-              weight="light"
-            />
-            <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
-              Telegram
-            </p>
-            <p className="text-xl">@shitsu_art</p>
-          </a>
+          {SOCIAL_LINKS.map((social) => {
+            const Icon = SOCIAL_ICONS[social.id];
+            if (!Icon) return null;
+            return (
+              <a
+                key={social.id}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-8 bg-neutral-50 hover:bg-neutral-100 transition-colors"
+              >
+                <Icon
+                  className="w-8 h-8 text-neutral-400 mb-6"
+                  weight="light"
+                />
+                <p className="text-xs tracking-[0.2em] uppercase text-neutral-500 mb-2">
+                  {social.label}
+                </p>
+                <p className="text-xl">{social.handle}</p>
+              </a>
+            );
+          })}
         </div>
       </div>
     </div>

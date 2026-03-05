@@ -2,24 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
 import { SEO } from "@/components/SEO";
+import { SOCIAL_LINKS } from "@/lib/types";
+import type { ComponentType } from "react";
 
-const socialLinks = [
-  {
-    icon: InstagramLogo,
-    href: "https://instagram.com/shitsu_kira",
-    label: "Instagram",
-  },
-  {
-    icon: TiktokLogo,
-    href: "https://www.tiktok.com/@_shitsu",
-    label: "TikTok",
-  },
-  {
-    icon: TelegramLogo,
-    href: "https://t.me/shitsu_art",
-    label: "Telegram",
-  },
-];
+const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string; weight?: string }>> = {
+  instagram: InstagramLogo,
+  tiktok: TiktokLogo,
+  telegram: TelegramLogo,
+};
 
 export function AboutPage() {
   const [scrollY, setScrollY] = useState(0);
@@ -27,19 +17,16 @@ export function AboutPage() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect();
-        const sectionTop = rect.top;
-        const windowHeight = window.innerHeight;
-        const progress = Math.max(
-          0,
-          Math.min(
-            1,
-            (windowHeight - sectionTop) / (windowHeight + rect.height),
-          ),
-        );
-        setScrollY(progress);
-      }
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const progress = Math.max(
+        0,
+        Math.min(
+          1,
+          (window.innerHeight - rect.top) / (window.innerHeight + rect.height),
+        ),
+      );
+      setScrollY(progress);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -97,27 +84,27 @@ export function AboutPage() {
             показывать это окружающим меня людям.
           </p>
 
-          <p className="text-neutral-900">
+          <p>
             Я не гонюсь за модой, за свежими видениями и инновациями. Просто
             хочу чтобы мои работы передавали красоту, глазами смотрящего.
             Изображая те вещи, которые хочу отразить в своей памяти и подарить
             наблюдателям те же чувства.
           </p>
 
-          <p className="text-neutral-900">
+          <p>
             Так же, как в подростковом возрасте, загораются глаза при виде своей
             первой любви, мои глаза загорелись при изучении Японии. Я вижу
             невероятные краски в этой стране и ее культуре, что очень часто
             отражается в моих работах.
           </p>
 
-          <p className="text-neutral-900">
+          <p>
             Я приглашаю своих сторонников, видящих яркими цветами эту жизнь,
             даже в ее темные моменты, присоединиться к моему творчеству. Ведь я
             влюблена в него и хочу разделить его с вами.
           </p>
 
-          <p className="text-neutral-900">
+          <p>
             Я никогда не останавливаюсь в развитии своего мастерства, так что
             скучно точно не будет. Но будут чувства, эмоции, которые нам всем
             иногда бывает так тяжело выразить словами.
@@ -126,22 +113,26 @@ export function AboutPage() {
 
         <div className="mt-16 text-center">
           <div className="flex justify-center gap-4">
-            {socialLinks.map(({ icon: Icon, href, label }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex flex-col items-center gap-3"
-              >
-                <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center group-hover:border-neutral-900 transition-colors">
-                  <Icon className="w-6 h-6" weight="light" />
-                </div>
-                <span className="text-xs tracking-[0.2em] uppercase text-neutral-500">
-                  {label}
-                </span>
-              </a>
-            ))}
+            {SOCIAL_LINKS.map((social) => {
+              const Icon = SOCIAL_ICONS[social.id];
+              if (!Icon) return null;
+              return (
+                <a
+                  key={social.id}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-3"
+                >
+                  <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center group-hover:border-neutral-900 transition-colors">
+                    <Icon className="w-6 h-6" weight="light" />
+                  </div>
+                  <span className="text-xs tracking-[0.2em] uppercase text-neutral-500">
+                    {social.label}
+                  </span>
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>

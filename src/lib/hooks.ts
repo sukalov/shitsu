@@ -1,48 +1,51 @@
+import { useCallback, useSyncExternalStore } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useSyncExternalStore } from "react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
+import type { Category, OrderStatus } from "./types";
 
-function getAdminToken() {
-  return typeof window !== "undefined"
-    ? localStorage.getItem("adminToken")
-    : null;
+const AUTH_KEY = "adminToken";
+
+function subscribeToAuth(callback: () => void) {
+  const handler = (e: StorageEvent) => {
+    if (e.key === AUTH_KEY) callback();
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
 }
 
-const emptySubscribe = () => () => {};
+function getAuthSnapshot() {
+  return localStorage.getItem(AUTH_KEY);
+}
 
 export function useAuth() {
-  return useSyncExternalStore(emptySubscribe, getAdminToken, () => null);
+  return useSyncExternalStore(subscribeToAuth, getAuthSnapshot, () => null);
 }
 
-export type Category = "originals" | "merch";
-
-export interface Product {
-  _id: Id<"products">;
-  _creationTime: number;
-  name: string;
-  price: number;
-  category: Category;
-  images: string[];
-  description: string;
-  isSold: boolean;
-  seriesId?: string;
+export function useSetAuth() {
+  return useCallback((token: string | null) => {
+    if (token) {
+      localStorage.setItem(AUTH_KEY, token);
+    } else {
+      localStorage.removeItem(AUTH_KEY);
+    }
+    // Dispatch storage event for same-tab reactivity
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: AUTH_KEY, newValue: token }),
+    );
+  }, []);
 }
 
-export interface CartItem {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image?: string;
-}
-
+// Products
 export function useProducts(category?: Category, isSold?: boolean) {
   return useQuery(api.products.listProducts, { category, isSold });
 }
 
-export function useProduct(id: Id<"products"> | string | undefined) {
-  return useQuery(api.products.getProduct, { id: id as Id<"products"> });
+export function useProduct(id: string | undefined) {
+  return useQuery(
+    api.products.getProduct,
+    id ? { id: id as Id<"products"> } : "skip",
+  );
 }
 
 export function useProductsBySeries(seriesId: string) {
@@ -65,24 +68,26 @@ export function useDeleteProduct() {
   return useMutation(api.products.deleteProduct);
 }
 
+export function useGenerateUploadUrl() {
+  return useMutation(api.products.generateUploadUrl);
+}
+
+// Orders
 export function useCreateOrder() {
   return useMutation(api.orders.createOrder);
 }
 
 export function useOrders(status?: string) {
   return useQuery(api.orders.listOrders, {
-    status: status as
-      | "pending"
-      | "confirmed"
-      | "shipped"
-      | "delivered"
-      | "cancelled"
-      | undefined,
+    status: status as OrderStatus | undefined,
   });
 }
 
-export function useOrder(id: Id<"orders"> | string | undefined) {
-  return useQuery(api.orders.getOrder, { id: id as Id<"orders"> });
+export function useOrder(id: string | undefined) {
+  return useQuery(
+    api.orders.getOrder,
+    id ? { id: id as Id<"orders"> } : "skip",
+  );
 }
 
 export function useUpdateOrderStatus() {
@@ -97,6 +102,7 @@ export function useOrderCount() {
   return useQuery(api.orders.getOrderCount);
 }
 
+// Admin
 export function useAdminExists() {
   return useQuery(api.admin.checkAdminExists);
 }
@@ -111,8 +117,4 @@ export function useSetupAdmin() {
 
 export function useChangePassword() {
   return useMutation(api.admin.changePassword);
-}
-
-export function useGenerateUploadUrl() {
-  return useMutation(api.products.generateUploadUrl);
 }

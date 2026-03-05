@@ -1,4 +1,5 @@
-import { useProducts, type Category } from "@/lib/hooks";
+import { useProducts } from "@/lib/hooks";
+import type { Category } from "@/lib/types";
 import { ProductGridSkeleton } from "@/components/loading-states";
 import { ProductCard } from "@/components/ProductCard";
 import { HeaderImage } from "@/components/HeaderImage";

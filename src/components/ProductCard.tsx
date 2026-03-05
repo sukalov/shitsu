@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/product-image";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 

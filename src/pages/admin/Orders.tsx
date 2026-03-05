@@ -4,29 +4,14 @@ import { useOrders, useUpdateOrderStatus, useOrderCount } from "@/lib/hooks";
 import { Id } from "../../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { AdminTableSkeleton } from "@/components/loading-states";
+import {
+  type OrderStatus,
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_COLORS,
+  getDeliveryLabel,
+} from "@/lib/types";
 
-type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
-
-const statusLabels: Record<OrderStatus, string> = {
-  pending: "Новый",
-  confirmed: "Подтверждён",
-  shipped: "Отправлен",
-  delivered: "Доставлен",
-  cancelled: "Отменён",
-};
-
-const statusColors: Record<OrderStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped: "bg-purple-100 text-purple-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-neutral-100 text-neutral-500",
-};
+const ALL_STATUSES = Object.keys(ORDER_STATUS_LABELS) as OrderStatus[];
 
 export function AdminOrders() {
   const orders = useOrders();
@@ -76,7 +61,7 @@ export function AdminOrders() {
         >
           Все
         </button>
-        {(Object.keys(statusLabels) as OrderStatus[]).map((status) => (
+        {ALL_STATUSES.map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -87,7 +72,7 @@ export function AdminOrders() {
                 : "bg-neutral-100 text-neutral-500 hover:bg-neutral-200",
             )}
           >
-            {statusLabels[status]}
+            {ORDER_STATUS_LABELS[status]}
           </button>
         ))}
       </div>
@@ -111,12 +96,14 @@ export function AdminOrders() {
                     <span
                       className={cn(
                         "px-2 py-1 text-xs",
-                        order.status
-                          ? statusColors[order.status]
-                          : statusColors.pending,
+                        ORDER_STATUS_COLORS[
+                          (order.status as OrderStatus) ?? "pending"
+                        ],
                       )}
                     >
-                      {order.status ? statusLabels[order.status] : "Новый"}
+                      {ORDER_STATUS_LABELS[
+                        (order.status as OrderStatus) ?? "pending"
+                      ]}
                     </span>
                   </div>
                   <p className="text-sm text-neutral-500">
@@ -142,11 +129,7 @@ export function AdminOrders() {
                     Доставка
                   </h4>
                   <p className="text-sm">
-                    {order.deliveryMethod === "post"
-                      ? "Почта России"
-                      : order.deliveryMethod === "cdek"
-                        ? "СДЭК"
-                        : "OZON"}
+                    {getDeliveryLabel(order.deliveryMethod)}
                   </p>
                   {order.address && <p className="text-sm">{order.address}</p>}
                 </div>
@@ -176,20 +159,18 @@ export function AdminOrders() {
                     Изменить статус
                   </h4>
                   <div className="flex gap-2">
-                    {(Object.keys(statusLabels) as OrderStatus[]).map(
-                      (status) => (
-                        <Button
-                          key={status}
-                          size="sm"
-                          variant={
-                            order.status === status ? "default" : "outline"
-                          }
-                          onClick={() => handleStatusChange(order._id, status)}
-                        >
-                          {statusLabels[status]}
-                        </Button>
-                      ),
-                    )}
+                    {ALL_STATUSES.map((status) => (
+                      <Button
+                        key={status}
+                        size="sm"
+                        variant={
+                          order.status === status ? "default" : "outline"
+                        }
+                        onClick={() => handleStatusChange(order._id, status)}
+                      >
+                        {ORDER_STATUS_LABELS[status]}
+                      </Button>
+                    ))}
                   </div>
                 </div>
               )}

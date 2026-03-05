@@ -1,9 +1,6 @@
 import { useNavigate, NavLink } from "react-router";
+import { useSetAuth } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
 
 const navItems = [
   { label: "Товары", to: "/admin/products" },
@@ -11,11 +8,12 @@ const navItems = [
   { label: "Настройки", to: "/admin/settings" },
 ];
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
+  const setAuth = useSetAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem("adminToken");
+    setAuth(null);
     void navigate("/admin");
   };
 

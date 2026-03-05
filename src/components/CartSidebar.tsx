@@ -17,9 +17,42 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCart } from "@/contexts/CartContext";
+import { useCart } from "@/lib/cart";
 import { getImageUrl, cn } from "@/lib/utils";
 import { createTelegramLink } from "@/lib/telegram";
+import { DELIVERY_METHODS, getDeliveryLabel } from "@/lib/types";
+
+function TelegramSubmitButton({
+  enabled,
+  href,
+}: {
+  enabled: boolean;
+  href?: string;
+}) {
+  if (enabled && href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-primary text-primary-foreground hover:bg-primary/80 uppercase tracking-[0.1em] text-sm font-medium transition-all"
+      >
+        <TelegramLogo className="w-4 h-4" />
+        Отправить
+      </a>
+    );
+  }
+  return (
+    <button
+      type="button"
+      disabled
+      className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-neutral-300 text-neutral-500 uppercase tracking-[0.1em] text-sm font-medium cursor-not-allowed"
+    >
+      <TelegramLogo className="w-4 h-4" />
+      Отправить
+    </button>
+  );
+}
 
 export function CartSidebar() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, total } =
@@ -33,6 +66,23 @@ export function CartSidebar() {
     e.preventDefault();
     setOrderSubmitted(true);
   };
+
+  const checkoutLink =
+    address.trim()
+      ? createTelegramLink({
+          "":
+            "ЗАКАЗ\n\n" +
+            items
+              .map(
+                (item) =>
+                  `${item.name} (${item.quantity} шт.) - ${(item.price * item.quantity).toLocaleString("ru-RU")} ₽`,
+              )
+              .join("\n"),
+          Доставка: getDeliveryLabel(deliveryMethod),
+          Адрес: address,
+          Итого: `${total.toLocaleString("ru-RU")} ₽`,
+        })
+      : undefined;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -96,11 +146,7 @@ export function CartSidebar() {
                   onValueChange={setDeliveryMethod}
                   className="space-y-3"
                 >
-                  {[
-                    { id: "post", label: "Почта России" },
-                    { id: "cdek", label: "СДЭК" },
-                    { id: "ozon", label: "OZON" },
-                  ].map((method) => (
+                  {DELIVERY_METHODS.map((method) => (
                     <label
                       key={method.id}
                       htmlFor={method.id}
@@ -159,44 +205,12 @@ export function CartSidebar() {
                   </span>
                 </div>
               </div>
+
               <div className="space-y-2">
-                {address.trim() ? (
-                  <a
-                    href={createTelegramLink({
-                      "":
-                        "ЗАКАЗ\n\n" +
-                        items
-                          .map(
-                            (item) =>
-                              `${item.name} (${item.quantity} шт.) - ${(item.price * item.quantity).toLocaleString("ru-RU")} ₽`,
-                          )
-                          .join("\n"),
-                      Доставка:
-                        deliveryMethod === "post"
-                          ? "Почта России"
-                          : deliveryMethod === "cdek"
-                            ? "СДЭК"
-                            : "OZON",
-                      Адрес: address,
-                      Итого: `${total.toLocaleString("ru-RU")} ₽`,
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-primary text-primary-foreground hover:bg-primary/80 uppercase tracking-[0.1em] text-sm font-medium transition-all"
-                  >
-                    <TelegramLogo className="w-4 h-4" />
-                    Отправить
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 bg-neutral-300 text-neutral-500 uppercase tracking-[0.1em] text-sm font-medium cursor-not-allowed"
-                  >
-                    <TelegramLogo className="w-4 h-4" />
-                    Отправить
-                  </button>
-                )}
+                <TelegramSubmitButton
+                  enabled={!!address.trim()}
+                  href={checkoutLink}
+                />
                 <p className="text-xs text-neutral-400 text-center">
                   Для отправки вы будете перенаправлены в телеграм
                 </p>
@@ -225,35 +239,33 @@ export function CartSidebar() {
                       <p className="text-sm text-neutral-500 mb-3">
                         {item.price.toLocaleString("ru-RU")} ₽
                       </p>
-                      <div className="flex items-center gap-3">
-                        {item.category !== "originals" && (
-                          <>
-                            <Button
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity - 1)
-                              }
-                              variant="outline"
-                              size="icon-sm"
-                              className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
-                            >
-                              <Minus className="w-3 h-3" />
-                            </Button>
-                            <span className="text-sm w-8 text-center">
-                              {item.quantity}
-                            </span>
-                            <Button
-                              onClick={() =>
-                                updateQuantity(item._id, item.quantity + 1)
-                              }
-                              variant="outline"
-                              size="icon-sm"
-                              className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
-                            >
-                              <Plus className="w-3 h-3" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      {item.category !== "originals" && (
+                        <div className="flex items-center gap-3">
+                          <Button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity - 1)
+                            }
+                            variant="outline"
+                            size="icon-sm"
+                            className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </Button>
+                          <span className="text-sm w-8 text-center">
+                            {item.quantity}
+                          </span>
+                          <Button
+                            onClick={() =>
+                              updateQuantity(item._id, item.quantity + 1)
+                            }
+                            variant="outline"
+                            size="icon-sm"
+                            className="rounded-none border-neutral-300 hover:border-neutral-900 hover:bg-neutral-900 hover:text-white"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <Button
                       onClick={() => removeItem(item._id)}

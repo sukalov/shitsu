@@ -1,23 +1,13 @@
 import { Link } from "react-router";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
+import { SOCIAL_LINKS } from "@/lib/types";
+import type { ComponentType } from "react";
 
-const socialLinks = [
-  {
-    icon: InstagramLogo,
-    href: "https://instagram.com/shitsu_kira",
-    label: "Instagram",
-  },
-  {
-    icon: TiktokLogo,
-    href: "https://www.tiktok.com/@_shitsu",
-    label: "TikTok",
-  },
-  {
-    icon: TelegramLogo,
-    href: "https://t.me/shitsu_art",
-    label: "Telegram",
-  },
-];
+const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string; weight?: string }>> = {
+  instagram: InstagramLogo,
+  tiktok: TiktokLogo,
+  telegram: TelegramLogo,
+};
 
 export function Footer() {
   return (
@@ -96,18 +86,22 @@ export function Footer() {
 
         <div className="py-6 border-t border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            {socialLinks.map(({ icon: Icon, href, label }) => (
-              <a
-                key={href}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="w-10 h-10 border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-50 transition-all duration-300"
-              >
-                <Icon className="w-4 h-4" weight="light" />
-              </a>
-            ))}
+            {SOCIAL_LINKS.map((social) => {
+              const Icon = SOCIAL_ICONS[social.id];
+              if (!Icon) return null;
+              return (
+                <a
+                  key={social.id}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="w-10 h-10 border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-900 hover:text-neutral-900 hover:bg-neutral-50 transition-all duration-300"
+                >
+                  <Icon className="w-4 h-4" weight="light" />
+                </a>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-4">

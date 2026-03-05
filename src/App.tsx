@@ -1,7 +1,6 @@
 import { useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useNavigate, Navigate, Outlet } from "react-router";
 import { useAuth } from "@/lib/hooks";
-import { CartProvider } from "@/contexts/CartContext";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { Navigation } from "@/components/Navigation";
 import { CartSidebar } from "@/components/CartSidebar";
@@ -58,23 +57,23 @@ function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (token === null) {
-      return;
-    }
-    if (!token) {
-      void navigate("/admin/auth");
-    }
+    if (token === null) return;
+    if (!token) void navigate("/admin/auth");
   }, [token, navigate]);
 
-  if (token === null) {
-    return <PageLoader />;
-  }
-
-  if (!token) {
-    return null;
-  }
+  if (!token) return <PageLoader />;
 
   return <>{children}</>;
+}
+
+function ProtectedAdminRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <AdminAuthGuard>
+      <Suspense fallback={<PageLoader />}>
+        <AdminLayout>{children}</AdminLayout>
+      </Suspense>
+    </AdminAuthGuard>
+  );
 }
 
 function AdminIndex() {
@@ -96,13 +95,7 @@ function AdminNotFound() {
   const navigate = useNavigate();
   const token = useAuth();
 
-  if (token === null) {
-    return <PageLoader />;
-  }
-
-  if (!token) {
-    return <Navigate to="/admin/auth" replace />;
-  }
+  if (!token) return <Navigate to="/admin/auth" replace />;
 
   return (
     <Suspense fallback={<PageLoader />}>
@@ -141,37 +134,25 @@ function AdminRoutes() {
       <Route
         path="/products"
         element={
-          <AdminAuthGuard>
-            <Suspense fallback={<PageLoader />}>
-              <AdminLayout>
-                <AdminProducts />
-              </AdminLayout>
-            </Suspense>
-          </AdminAuthGuard>
+          <ProtectedAdminRoute>
+            <AdminProducts />
+          </ProtectedAdminRoute>
         }
       />
       <Route
         path="/orders"
         element={
-          <AdminAuthGuard>
-            <Suspense fallback={<PageLoader />}>
-              <AdminLayout>
-                <AdminOrders />
-              </AdminLayout>
-            </Suspense>
-          </AdminAuthGuard>
+          <ProtectedAdminRoute>
+            <AdminOrders />
+          </ProtectedAdminRoute>
         }
       />
       <Route
         path="/settings"
         element={
-          <AdminAuthGuard>
-            <Suspense fallback={<PageLoader />}>
-              <AdminLayout>
-                <AdminSettings />
-              </AdminLayout>
-            </Suspense>
-          </AdminAuthGuard>
+          <ProtectedAdminRoute>
+            <AdminSettings />
+          </ProtectedAdminRoute>
         }
       />
       <Route path="/" element={<AdminIndex />} />
@@ -180,106 +161,102 @@ function AdminRoutes() {
   );
 }
 
-function PublicLayout({ children }: { children: React.ReactNode }) {
+function PublicLayout() {
   return (
-    <>
+    <div className="min-h-screen bg-white">
       <Navigation />
-      {children}
+      <Outlet />
       <Footer />
-    </>
+      <CartSidebar />
+    </div>
   );
+}
+
+function SuspendedRoute({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
 }
 
 export default function App() {
   return (
-    <CartProvider>
+    <>
       <ScrollToTop />
       <Routes>
-        <Route
-          element={
-            <div className="min-h-screen bg-white">
-              <PublicLayout>
-                <Outlet />
-              </PublicLayout>
-              <CartSidebar />
-            </div>
-          }
-        >
+        <Route element={<PublicLayout />}>
           <Route
             path="/"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <HomePage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/originals"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <CategoryPage category="originals" title="Оригиналы" />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/merch"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <CategoryPage category="merch" title="Мерч" />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/archive"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <CategoryPage title="Архив" isSold={true} />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/product/:id"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <ProductPage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/custom"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <CustomPage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/about"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <AboutPage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/contacts"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <ContactsPage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
           <Route
             path="/delivery"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <SuspendedRoute>
                 <DeliveryPage />
-              </Suspense>
+              </SuspendedRoute>
             }
           />
         </Route>
         <Route path="/admin/*" element={<AdminRoutes />} />
       </Routes>
-    </CartProvider>
+    </>
   );
 }

@@ -3,25 +3,63 @@ import { Link, useParams } from "react-router";
 import { ArrowLeft, ShoppingBag } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { ProductDetailSkeleton } from "@/components/loading-states";
-import { useProducts } from "@/lib/hooks";
-import { useCart } from "@/contexts/CartContext";
+import { useProduct, useProducts } from "@/lib/hooks";
+import { useCart } from "@/lib/cart";
 import { getImageUrl, cn } from "@/lib/utils";
 import { SEO } from "@/components/SEO";
 import { generateProductMeta } from "@/lib/seo-config";
 
+function VariantCard({
+  product,
+}: {
+  product: {
+    _id: string;
+    name: string;
+    price: number;
+    images: string[];
+    isSold: boolean;
+  };
+}) {
+  return (
+    <Link to={`/product/${product._id}`} className="group flex-shrink-0">
+      <div className="relative w-20 h-20 bg-neutral-100 overflow-hidden mb-2">
+        <img
+          src={getImageUrl(product.images[0])}
+          alt={product.name}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="lazy"
+        />
+        {product.isSold && (
+          <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-1 py-1">
+            <img
+              src="./headers/sold.webp"
+              alt="Продано"
+              className="h-12 w-full object-contain"
+            />
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-1 max-w-[80px] uppercase tracking-[0.1em]">
+        {product.name}
+      </p>
+      <p className="text-xs text-neutral-500">
+        {product.price.toLocaleString("ru-RU")} ₽
+      </p>
+    </Link>
+  );
+}
+
 export function ProductPage() {
   const { id } = useParams();
-  const products = useProducts();
-  const product =
-    products?.find((p) => p._id === id) || (products && products[0]);
-  const allProducts = useProducts();
+  const product = useProduct(id);
+  const allProducts = useProducts(undefined, false);
   const { addItem } = useCart();
   const [currentImage, setCurrentImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
-  if (!products) {
+  if (product === undefined) {
     return (
       <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
@@ -40,18 +78,19 @@ export function ProductPage() {
   }
 
   const seriesProducts = product.seriesId
-    ? (allProducts || []).filter(
+    ? (allProducts ?? []).filter(
         (p) => p.seriesId === product.seriesId && p._id !== product._id,
       )
     : [];
 
-  const relatedProducts = (allProducts || []).filter(
+  const relatedProducts = (allProducts ?? []).filter(
     (p) =>
       p.category === product.category &&
       p._id !== product._id &&
       !p.isSold &&
       !(product.seriesId && p.seriesId === product.seriesId),
   );
+
   const relatedTitle =
     product.category === "merch" ? "Другой мерч" : "Другие оригиналы";
 
@@ -66,65 +105,25 @@ export function ProductPage() {
     });
   };
 
-  const productMeta = product ? generateProductMeta(product) : null;
-
-  const ProductCard = ({
-    product: p,
-  }: {
-    product: {
-      _id: string;
-      name: string;
-      price: number;
-      images: string[];
-      isSold: boolean;
-    };
-  }) => (
-    <Link to={`/product/${p._id}`} className="group flex-shrink-0">
-      <div className="relative w-20 h-20 bg-neutral-100 overflow-hidden mb-2">
-        <img
-          src={getImageUrl(p.images[0])}
-          alt={p.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-        />
-        {p.isSold && (
-          <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-1 py-1">
-            <img
-              src="./headers/sold.webp"
-              alt="Продано"
-              className="h-12 w-full object-contain"
-            />
-          </div>
-        )}
-      </div>
-      <p className="text-xs text-neutral-900 group-hover:text-neutral-600 transition-colors line-clamp-1 max-w-[80px] uppercase tracking-[0.1em]">
-        {p.name}
-      </p>
-      <p className="text-xs text-neutral-500">
-        {p.price.toLocaleString("ru-RU")} ₽
-      </p>
-    </Link>
-  );
+  const productMeta = generateProductMeta(product);
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
-      {productMeta && (
-        <SEO
-          title={productMeta.title}
-          description={productMeta.description}
-          image={productMeta.image}
-          path={`/product/${product._id}`}
-          product={productMeta.product}
-          breadcrumbs={[
-            { name: "Главная", path: "/" },
-            {
-              name: product.category === "originals" ? "Оригиналы" : "Мерч",
-              path: product.category === "originals" ? "/originals" : "/merch",
-            },
-            { name: product.name, path: `/product/${product._id}` },
-          ]}
-        />
-      )}
+      <SEO
+        title={productMeta.title}
+        description={productMeta.description}
+        image={productMeta.image}
+        path={`/product/${product._id}`}
+        product={productMeta.product}
+        breadcrumbs={[
+          { name: "Главная", path: "/" },
+          {
+            name: product.category === "originals" ? "Оригиналы" : "Мерч",
+            path: product.category === "originals" ? "/originals" : "/merch",
+          },
+          { name: product.name, path: `/product/${product._id}` },
+        ]}
+      />
       <div className="max-w-[1600px] mx-auto">
         <Link
           to="/"
@@ -215,22 +214,20 @@ export function ProductPage() {
                   </h3>
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {seriesProducts.map((variant) => (
-                      <ProductCard key={variant._id} product={variant} />
+                      <VariantCard key={variant._id} product={variant} />
                     ))}
                   </div>
                 </div>
               )}
 
               {product.description && (
-                <div>
-                  <p className="text-neutral-600 leading-relaxed">
-                    {product.description}
-                  </p>
-                </div>
+                <p className="text-neutral-600 leading-relaxed">
+                  {product.description}
+                </p>
               )}
 
-              <div className="pt-4">
-                {!product.isSold && (
+              {!product.isSold && (
+                <div className="pt-4">
                   <Button
                     onClick={() => addItem(product)}
                     className="w-full uppercase tracking-[0.1em]"
@@ -239,8 +236,8 @@ export function ProductPage() {
                     <ShoppingBag className="mr-2 w-5 h-5" />
                     Добавить в корзину
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -252,7 +249,7 @@ export function ProductPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.slice(0, 4).map((p) => (
-                <ProductCard key={p._id} product={p} />
+                <VariantCard key={p._id} product={p} />
               ))}
             </div>
           </div>

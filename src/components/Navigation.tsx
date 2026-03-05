@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router";
 import { ShoppingBag, List, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/CartContext";
+import { useCartBadge } from "@/lib/cart";
 import { cn } from "@/lib/utils";
 
 const menuItems = [
@@ -17,7 +17,7 @@ const menuItems = [
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { items, setIsOpen } = useCart();
+  const { count, setIsOpen } = useCartBadge();
   const location = useLocation();
 
   useEffect(() => {
@@ -28,12 +28,16 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <>
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-          isMenuOpen && "hidden",
           isScrolled
             ? "bg-white/95 backdrop-blur-md py-4 shadow-sm"
             : "bg-transparent py-6",
@@ -75,9 +79,9 @@ export function Navigation() {
                 className="relative p-2 text-neutral-900 hover:text-neutral-600 transition-colors"
               >
                 <ShoppingBag className="w-5 h-5" weight="light" />
-                {items.length > 0 && (
+                {count > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-neutral-900 text-[10px] text-white flex items-center justify-center">
-                    {items.length}
+                    {count}
                   </span>
                 )}
               </Button>
@@ -101,22 +105,12 @@ export function Navigation() {
       </header>
 
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white">
-          <div className="absolute top-6 left-6">
-            <Link to="/" onClick={() => setIsMenuOpen(false)}>
-              <img
-                src="./logo.png"
-                alt="SHITSU"
-                className="h-8 w-auto object-contain"
-              />
-            </Link>
-          </div>
+        <div className="fixed inset-0 z-40 bg-white pt-24">
           <div className="flex flex-col items-start justify-center h-full pl-12">
             {menuItems.map((item, idx) => (
               <Link
                 key={item.href}
                 to={item.href}
-                onClick={() => setIsMenuOpen(false)}
                 className={cn(
                   "text-3xl py-4 transition-all duration-500",
                   location.pathname === item.href
