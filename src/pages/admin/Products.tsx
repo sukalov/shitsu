@@ -16,6 +16,7 @@ import {
   useUpdateProduct,
   useDeleteProduct,
   useGenerateUploadUrl,
+  useDeleteImage,
 } from "@/lib/hooks";
 import type { Product, Category } from "@/lib/types";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -59,6 +60,7 @@ export function AdminProducts() {
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
   const generateUploadUrl = useGenerateUploadUrl();
+  const deleteImage = useDeleteImage();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -208,6 +210,9 @@ export function AdminProducts() {
   };
 
   const removeImage = (index: number, imageId: string) => {
+    if (!imageId.startsWith("http")) {
+      void deleteImage({ storageId: imageId });
+    }
     setFormData({
       ...formData,
       images: formData.images.filter((_, i) => i !== index),

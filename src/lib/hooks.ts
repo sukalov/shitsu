@@ -72,6 +72,10 @@ export function useGenerateUploadUrl() {
   return useMutation(api.products.generateUploadUrl);
 }
 
+export function useDeleteImage() {
+  return useMutation(api.products.deleteImage);
+}
+
 // Orders
 export function useCreateOrder() {
   return useMutation(api.orders.createOrder);

@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
@@ -112,7 +112,15 @@ export const deleteProduct = mutation({
   args: { id: v.id("products") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.db.delete("products", args.id);
+    const product = await ctx.db.get(args.id);
+    if (product) {
+      for (const image of product.images) {
+        if (!image.startsWith("http")) {
+          await ctx.storage.delete(image as Id<"_storage">);
+        }
+      }
+    }
+    await ctx.db.delete(args.id);
     return null;
   },
 });
@@ -142,11 +150,13 @@ export const generateUploadUrl = mutation({
   },
 });
 
-export const deleteImage = internalMutation({
-  args: { storageId: v.id("_storage") },
+export const deleteImage = mutation({
+  args: { storageId: v.string() },
   returns: v.null(),
   handler: async (ctx, args) => {
-    await ctx.storage.delete(args.storageId);
+    if (!args.storageId.startsWith("http")) {
+      await ctx.storage.delete(args.storageId as Id<"_storage">);
+    }
     return null;
   },
 });
