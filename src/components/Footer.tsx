@@ -1,9 +1,13 @@
 import { Link } from "react-router";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
+import type { IconWeight } from "@phosphor-icons/react";
 import { SOCIAL_LINKS } from "@/lib/types";
 import type { ComponentType } from "react";
 
-const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string; weight?: string }>> = {
+const SOCIAL_ICONS: Record<
+  string,
+  ComponentType<{ className?: string; weight?: IconWeight }>
+> = {
   instagram: InstagramLogo,
   tiktok: TiktokLogo,
   telegram: TelegramLogo,

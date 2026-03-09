@@ -1,11 +1,15 @@
 import { MapPin, Envelope } from "@phosphor-icons/react";
 import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
+import type { IconWeight } from "@phosphor-icons/react";
 import { HeaderImage } from "@/components/HeaderImage";
 import { SEO } from "@/components/SEO";
 import { SOCIAL_LINKS } from "@/lib/types";
 import type { ComponentType } from "react";
 
-const SOCIAL_ICONS: Record<string, ComponentType<{ className?: string; weight?: string }>> = {
+const SOCIAL_ICONS: Record<
+  string,
+  ComponentType<{ className?: string; weight?: IconWeight }>
+> = {
   instagram: InstagramLogo,
   tiktok: TiktokLogo,
   telegram: TelegramLogo,
