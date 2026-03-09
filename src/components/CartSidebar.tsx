@@ -57,6 +57,7 @@ function TelegramSubmitButton({
 export function CartSidebar() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, total } =
     useCart();
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const [deliveryMethod, setDeliveryMethod] = useState("post");
@@ -67,22 +68,21 @@ export function CartSidebar() {
     setOrderSubmitted(true);
   };
 
-  const checkoutLink =
-    address.trim()
-      ? createTelegramLink({
-          "":
-            "ЗАКАЗ\n\n" +
-            items
-              .map(
-                (item) =>
-                  `${item.name} (${item.quantity} шт.) - ${(item.price * item.quantity).toLocaleString("ru-RU")} ₽`,
-              )
-              .join("\n"),
-          Доставка: getDeliveryLabel(deliveryMethod),
-          Адрес: address,
-          Итого: `${total.toLocaleString("ru-RU")} ₽`,
-        })
-      : undefined;
+  const checkoutLink = address.trim()
+    ? createTelegramLink({
+        "":
+          "ЗАКАЗ\n\n" +
+          items
+            .map(
+              (item) =>
+                `${item.name} (${item.quantity} шт.) - ${(item.price * item.quantity).toLocaleString("ru-RU")} ₽`,
+            )
+            .join("\n"),
+        Доставка: getDeliveryLabel(deliveryMethod),
+        Адрес: address,
+        Итого: `${total.toLocaleString("ru-RU")} ₽`,
+      })
+    : undefined;
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -187,15 +187,51 @@ export function CartSidebar() {
                 />
               </div>
 
-              <div className="border-t border-neutral-200 pt-6 space-y-3">
+              <div className="border-t border-neutral-200 pt-6 space-y-4">
                 <div className="flex justify-between text-sm text-neutral-500">
                   <span className="text-xs uppercase tracking-[0.1em]">
-                    Товары ({items.length})
+                    Товары ({itemCount})
                   </span>
                   <span className="text-xs uppercase tracking-[0.1em]">
                     {total.toLocaleString("ru-RU")} ₽
                   </span>
                 </div>
+
+                <div className="space-y-3 max-h-48 overflow-auto">
+                  {items.map((item) => (
+                    <div
+                      key={item._id}
+                      className="flex items-center gap-3 pb-3 border-b border-neutral-100 last:border-0"
+                    >
+                      <div className="w-12 h-12 bg-neutral-100 overflow-hidden flex-shrink-0">
+                        <img
+                          src={getImageUrl(item.images[0])}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs uppercase tracking-[0.1em] truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {item.quantity} × {item.price.toLocaleString("ru-RU")}{" "}
+                          ₽
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => removeItem(item._id)}
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-neutral-300 hover:text-neutral-900 flex-shrink-0"
+                      >
+                        <X className="w-3 h-3" weight="light" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="flex justify-between text-xl pt-3 border-t border-neutral-200">
                   <span className="text-xs uppercase tracking-[0.1em]">
                     Итого
