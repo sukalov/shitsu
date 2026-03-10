@@ -4,25 +4,23 @@ import { SEO } from "@/components/SEO";
 
 export function DeliveryPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
+    <div className="min-h-screen pt-24 md:pt-32 pb-16 md:pb-20 px-6 lg:px-12">
       <SEO page="delivery" />
       <div className="max-w-[900px] mx-auto">
-        <div className="text-center mb-20">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-0 mb-6">
+        <div className="text-center mb-12 md:mb-20">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-0 mb-4 md:mb-6">
             <HeaderImage
               src="./headers/delivery.webp"
               alt="Доставка и оплата"
-              className="w-full md:w-auto h-14 lg:h-20 object-contain"
+              className="h-[min(3.5rem,10vw)] lg:h-[min(5rem,6vw)] w-auto object-contain"
             />
             <HeaderImage
               src="./headers/returns.webp"
               alt="Возврат"
-              className="w-full md:w-auto h-14 lg:h-20 object-contain"
+              className="h-[min(3.5rem,10vw)] lg:h-[min(5rem,6vw)] w-auto object-contain"
             />
           </div>
-          <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase">
-            Доставка и оплата
-          </h1>
+          <h1 className="sr-only">Доставка и оплата</h1>
         </div>
 
         <div className="space-y-12">
