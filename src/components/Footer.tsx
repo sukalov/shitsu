@@ -29,7 +29,7 @@ export function Footer() {
             <img
               src="./headers/name.webp"
               alt=""
-              className="h-5 w-auto object-contain mx-auto"
+              className="h-7 w-auto object-contain mx-auto"
             />
           </div>
 
