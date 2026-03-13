@@ -38,23 +38,21 @@ export function AboutPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const stickerProgress = Math.min(1, Math.max(0, (scrollY - 0.2) * 1.5));
-  const stickerY = 100 - stickerProgress * 100;
+  const stickerProgress = Math.min(1, Math.max(0, (scrollY - 0.25) * 1.5));
+  const stickerY = 150 - stickerProgress * 150;
   const stickerRotate = -15 + stickerProgress * 15;
   const stickerScale = 0.8 + stickerProgress * 0.2;
 
   return (
-    <div
-      ref={sectionRef}
-      className="min-h-screen pt-32 pb-20 relative overflow-hidden"
-    >
+    <div ref={sectionRef} className="min-h-screen pt-24 pb-20 bg-white relative overflow-hidden">
       <SEO page="about" />
+
       <div
-        className="fixed right-[5%] bottom-0 z-10 pointer-events-none"
+        className="fixed right-[-30%] bottom-[0%] z-30 pointer-events-none md:hidden"
         style={{
           transform: `translateY(${stickerY}%) rotate(${stickerRotate}deg) scale(${stickerScale})`,
           transition: "none",
-          width: "clamp(380px, 50vw, 600px)",
+          width: "clamp(280px, 80vw, 380px)",
           opacity: stickerProgress > 0 ? 1 : 0,
         }}
       >
@@ -68,18 +66,27 @@ export function AboutPage() {
         />
       </div>
 
-      <div className="max-w-[900px] mx-auto px-6 lg:px-12 relative z-0">
-        <HeaderImage
-          src="./headers/about.webp"
-          alt="Обо мне"
-          className="w-full h-14 lg:h-20 object-contain mb-12 mx-auto"
-        />
-        <h1 className="hidden text-3xl lg:text-4xl tracking-[0.15em] uppercase mb-12">
-          Обо мне
-        </h1>
+      <div className="max-w-[800px] mx-auto px-6 lg:px-8 relative z-20">
+        <div className="relative w-full mb-4">
+          <img
+            src="/about-background.png"
+            alt="Обо мне"
+            className="w-full h-auto object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <HeaderImage
+              src="./headers/about.webp"
+              alt="О СЕБЕ"
+              className="w-full max-w-[400px] lg:max-w-[600px] h-14 lg:h-24 object-contain"
+            />
+          </div>
+        </div>
 
-        <div className="space-y-6 text-neutral-900 leading-relaxed text-lg">
-          <p>
+        <div className="space-y-1 text-black font-medium text-sm md:text-[15px] leading-[1.6]">
+          <p className="indent-6">
+            Привет! Я художница SHITSU.
+          </p>
+          <p className="indent-6">
             Еще с детства мне было проще передавать свои чувства через холст,
             нежели простыми словами. Я впервые взяла в руки кисть будучи еще
             маленьким и ничего не понимающим в этом мире человеком. Сейчас я уже
@@ -88,34 +95,35 @@ export function AboutPage() {
             показывать это окружающим меня людям.
           </p>
 
-          <p>
-            Я не гонюсь за модой, за свежими видениями и инновациями. Просто
-            хочу чтобы мои работы передавали красоту, глазами смотрящего.
-            Изображая те вещи, которые хочу отразить в своей памяти и подарить
+          <p className="indent-6">
+            В этом, отчасти, и есть моя цель. Создавать картины, которые помогают людям
+            видеть эту жизнь и наслаждаться ей. Я не гонюсь за модой, за свежими видениями и
+            инновациями. Просто хочу чтобы мои работы передавали красоту, глазами
+            смотрящего. Изображая те вещи, которые хочу отразить в своей памяти и подарить
             наблюдателям те же чувства.
           </p>
 
-          <p>
+          <p className="indent-6">
             Так же, как в подростковом возрасте, загораются глаза при виде своей
             первой любви, мои глаза загорелись при изучении Японии. Я вижу
             невероятные краски в этой стране и ее культуре, что очень часто
-            отражается в моих работах.
+            отражается в моих работах, как дополнение к передачи ощущений.
           </p>
 
-          <p>
+          <p className="indent-6">
             Я приглашаю своих сторонников, видящих яркими цветами эту жизнь,
             даже в ее темные моменты, присоединиться к моему творчеству. Ведь я
             влюблена в него и хочу разделить его с вами.
           </p>
 
-          <p>
+          <p className="indent-6">
             Я никогда не останавливаюсь в развитии своего мастерства, так что
             скучно точно не будет. Но будут чувства, эмоции, которые нам всем
             иногда бывает так тяжело выразить словами.
           </p>
         </div>
 
-        <div className="mt-16 text-center">
+        <div className="mt-16 text-center relative z-20">
           <div className="flex justify-center gap-4">
             {SOCIAL_LINKS.map((social) => {
               const Icon = SOCIAL_ICONS[social.id];
@@ -126,12 +134,12 @@ export function AboutPage() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex flex-col items-center gap-3"
+                  className="group flex flex-col items-center gap-3 relative z-30"
                 >
-                  <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center group-hover:border-neutral-900 transition-colors">
-                    <Icon className="w-6 h-6" weight="light" />
+                  <div className="w-16 h-16 border border-neutral-300 flex items-center justify-center group-hover:border-neutral-900 transition-colors bg-white">
+                    <Icon className="w-6 h-6 text-black" weight="light" />
                   </div>
-                  <span className="text-xs tracking-[0.2em] uppercase text-neutral-500">
+                  <span className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-neutral-500">
                     {social.label}
                   </span>
                 </a>
@@ -143,3 +151,4 @@ export function AboutPage() {
     </div>
   );
 }
+
