@@ -18,7 +18,7 @@ export function Footer() {
     <footer className="border-t border-neutral-200 bg-white">
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
         <div className="py-12 flex flex-col md:flex-row md:items-start justify-between gap-10">
-          <div className="flex flex-col items-center md:items-start gap-3">
+          <div className="flex flex-col items-center md:items-start gap-7">
             <Link to="/" className="group">
               <img
                 src="./logo.png"
