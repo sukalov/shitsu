@@ -34,9 +34,6 @@ const AdminLogin = lazy(() =>
 const AdminProducts = lazy(() =>
   import("@/pages/admin/Products").then((m) => ({ default: m.AdminProducts })),
 );
-const AdminOrders = lazy(() =>
-  import("@/pages/admin/Orders").then((m) => ({ default: m.AdminOrders })),
-);
 const AdminSettings = lazy(() =>
   import("@/pages/admin/Settings").then((m) => ({ default: m.AdminSettings })),
 );
@@ -136,14 +133,6 @@ function AdminRoutes() {
         element={
           <ProtectedAdminRoute>
             <AdminProducts />
-          </ProtectedAdminRoute>
-        }
-      />
-      <Route
-        path="/orders"
-        element={
-          <ProtectedAdminRoute>
-            <AdminOrders />
           </ProtectedAdminRoute>
         }
       />

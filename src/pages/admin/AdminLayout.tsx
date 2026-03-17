@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Товары", to: "/admin/products" },
-  { label: "Заказы", to: "/admin/orders" },
   { label: "Настройки", to: "/admin/settings" },
 ];
 
