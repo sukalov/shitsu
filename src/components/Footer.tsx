@@ -1,5 +1,6 @@
+import { InstagramLogo, TelegramLogo, TiktokLogo } from "@phosphor-icons/react";
 import { Link } from "react-router";
-import { InstagramLogo, TiktokLogo, TelegramLogo } from "@phosphor-icons/react";
+
 import type { IconWeight } from "@phosphor-icons/react";
 import { SOCIAL_LINKS } from "@/lib/types";
 import type { ComponentType } from "react";
@@ -29,7 +30,7 @@ export function Footer() {
             <img
               src="./headers/name.webp"
               alt=""
-              className="h-7 w-auto object-contain mx-auto"
+              className="h-7 -ml-0.5 w-auto object-contain"
             />
           </div>
 
