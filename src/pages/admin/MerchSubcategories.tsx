@@ -3,18 +3,23 @@ import { AdminTableSkeleton } from "@/components/loading-states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCreateMerchSubcategory, useDeleteMerchSubcategory, useMerchSubcategories } from "@/lib/hooks";
+import { useCreateMerchSubcategory, useDeleteMerchSubcategory, useMerchSubcategories, useUpdateMerchSubcategoryOrder } from "@/lib/hooks";
+import { DotsSixVertical } from "@phosphor-icons/react";
 import { useState } from "react";
 
 export function AdminMerchSubcategories() {
   const merchSubcategories = useMerchSubcategories();
   const createMerchSubcategory = useCreateMerchSubcategory();
   const deleteMerchSubcategory = useDeleteMerchSubcategory();
+  const updateMerchSubcategoryOrder = useUpdateMerchSubcategoryOrder();
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [draggedId, setDraggedId] = useState<Id<"merchSubcategories"> | null>(
+    null,
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +122,9 @@ export function AdminMerchSubcategories() {
           <table className="min-w-full divide-y divide-neutral-200">
             <thead className="bg-neutral-50">
               <tr>
+                <th className="pl-12 py-3 text-left text-xs uppercase tracking-wider text-neutral-500">
+                  #
+                </th>
                 <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-neutral-500">
                   Название
                 </th>
@@ -129,8 +137,35 @@ export function AdminMerchSubcategories() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-neutral-200">
-              {merchSubcategories.map((subcategory) => (
-                <tr key={subcategory._id} className="hover:bg-neutral-50">
+              {merchSubcategories.map((subcategory, index) => (
+                <tr
+                  key={subcategory._id}
+                  className="hover:bg-neutral-50 cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={() => setDraggedId(subcategory._id)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => {
+                    if (!draggedId || draggedId === subcategory._id) return;
+                    const ids = merchSubcategories.map((s) => s._id);
+                    const from = ids.indexOf(draggedId);
+                    const to = ids.indexOf(subcategory._id);
+                    if (from === -1 || to === -1) return;
+                    ids.splice(from, 1);
+                    ids.splice(to, 0, draggedId);
+                    void updateMerchSubcategoryOrder({ orderedIds: ids });
+                    setDraggedId(null);
+                  }}
+                  onDragEnd={() => setDraggedId(null)}
+                >
+                  <td className="pl-4 px-6 py-4 whitespace-nowrap text-sm text-neutral-400">
+                    <div className="flex items-center gap-3">
+                      <DotsSixVertical
+                        className="h-4 w-4 mr-2  text-neutral-400"
+                        weight="bold"
+                      />
+                      <span>{index + 1}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {subcategory.name}
                   </td>

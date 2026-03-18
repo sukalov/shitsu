@@ -27,6 +27,7 @@ export interface MerchSubcategory {
   _creationTime: number;
   name: string;
   slug: string;
+  order?: number;
   createdAt: number;
 }
 

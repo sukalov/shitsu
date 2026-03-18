@@ -96,6 +96,10 @@ export function useDeleteMerchSubcategory() {
   return useMutation(api.merchSubcategories.deleteMerchSubcategory);
 }
 
+export function useUpdateMerchSubcategoryOrder() {
+  return useMutation(api.merchSubcategories.updateMerchSubcategoryOrder);
+}
+
 // Orders
 export function useCreateOrder() {
   return useMutation(api.orders.createOrder);

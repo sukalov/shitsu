@@ -10,11 +10,18 @@ export const listMerchSubcategories = query({
       _creationTime: v.number(),
       name: v.string(),
       slug: v.string(),
+      order: v.optional(v.number()),
       createdAt: v.number(),
     }),
   ),
   handler: async (ctx) => {
-    return await ctx.db.query("merchSubcategories").order("desc").collect();
+    const rows = await ctx.db.query("merchSubcategories").collect();
+    return rows.sort((a, b) => {
+      const ao = a.order ?? Number.POSITIVE_INFINITY;
+      const bo = b.order ?? Number.POSITIVE_INFINITY;
+      if (ao !== bo) return ao - bo;
+      return (a.createdAt ?? 0) - (b.createdAt ?? 0);
+    });
   },
 });
 
@@ -40,13 +47,35 @@ export const createMerchSubcategory = mutation({
       throw new Error("Подкатегория с таким slug уже существует");
     }
 
+    const existingRows = await ctx.db.query("merchSubcategories").collect();
+    const maxOrder = existingRows.reduce(
+      (acc, row) => Math.max(acc, row.order ?? -1),
+      -1,
+    );
+
     const id = await ctx.db.insert("merchSubcategories", {
       name: args.name,
       slug: normalizedSlug,
+      order: maxOrder + 1,
       createdAt: Date.now(),
     });
 
     return id;
+  },
+});
+
+export const updateMerchSubcategoryOrder = mutation({
+  args: {
+    orderedIds: v.array(v.id("merchSubcategories")),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    for (let i = 0; i < args.orderedIds.length; i++) {
+      const id = args.orderedIds[i];
+      if (!id) continue;
+      await ctx.db.patch(id, { order: i });
+    }
+    return null;
   },
 });
 

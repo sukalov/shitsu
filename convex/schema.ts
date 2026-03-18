@@ -25,9 +25,11 @@ export default defineSchema({
   merchSubcategories: defineTable({
     name: v.string(),
     slug: v.string(),
+    order: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index("by_slug", ["slug"])
+    .index("by_order", ["order"])
     .index("by_created", ["createdAt"]),
 
   orders: defineTable({
