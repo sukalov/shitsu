@@ -337,7 +337,10 @@ export function AdminProducts() {
             <Select
               value={formData.merchSubcategorySlug}
               onValueChange={(value) =>
-                setFormData({ ...formData, merchSubcategorySlug: value })
+                setFormData({
+                  ...formData,
+                  merchSubcategorySlug: value ?? "",
+                })
               }
               disabled={
                 formData.category !== "merch" || !merchSubcategories?.length

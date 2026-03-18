@@ -8,7 +8,7 @@ import { Link, useLocation } from "react-router";
 
 const menuItems = [
   { label: "Оригиналы", href: "/originals" },
-  { label: "Мерч", href: "/merch", id: "merch" as const },
+  { label: "Мерч", href: "/merch" },
   { label: "Индивидуальный", href: "/custom" },
   { label: "Архив", href: "/archive" },
   { label: "О себе", href: "/about" },
@@ -30,10 +30,14 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change (avoid sync setState in effect)
   useEffect(() => {
-    setIsMenuOpen(false);
-  }, [location.pathname]);
+    if (!isMenuOpen) return;
+    const id = window.setTimeout(() => {
+      setIsMenuOpen(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname, isMenuOpen]);
 
   return (
     <>
@@ -57,7 +61,7 @@ export function Navigation() {
 
             <div className="hidden lg:flex items-center gap-10">
               {menuItems.map((item) => {
-                const isMerch = item.id === "merch";
+                const isMerch = item.href === "/merch";
 
                 if (!isMerch) {
                   return (
@@ -159,7 +163,7 @@ export function Navigation() {
         <div className="fixed inset-0 z-40 bg-white pt-24">
           <div className="flex flex-col items-start justify-center h-full pl-12">
             {menuItems.map((item, idx) => {
-              const isMerch = item.id === "merch";
+              const isMerch = item.href === "/merch";
 
               if (!isMerch) {
                 return (

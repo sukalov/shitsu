@@ -16,7 +16,7 @@ const SOCIAL_ICONS: Record<
 };
 
 export function AboutPage() {
-  const [scrollY, setScrollY] = useState(0);
+  const [_scrollY, setScrollY] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
