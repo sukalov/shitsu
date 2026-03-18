@@ -81,8 +81,7 @@ export const listOrders = query({
     if (args.status) {
       return await ctx.db
         .query("orders")
-        .withIndex("by_status")
-        .filter((q) => q.eq(q.field("status"), args.status))
+        .withIndex("by_status", (q) => q.eq("status", args.status))
         .order("desc")
         .collect();
     }

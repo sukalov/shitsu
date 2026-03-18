@@ -19,6 +19,12 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_category", ["category"])
+    .index("by_isSold", ["isSold"])
+    .index("by_category_and_isSold", ["category", "isSold"])
+    .index("by_category_and_merchSubcategorySlug", [
+      "category",
+      "merchSubcategorySlug",
+    ])
     .index("by_series", ["seriesId"])
     .index("by_created", ["createdAt"]),
 

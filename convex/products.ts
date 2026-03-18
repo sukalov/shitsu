@@ -32,14 +32,33 @@ export const listProducts = query({
     }),
   ),
   handler: async (ctx, args) => {
-    let products = await ctx.db.query("products").order("desc").collect();
-
-    if (args.category) {
-      products = products.filter((p) => p.category === args.category);
-    }
-
-    if (args.isSold !== undefined) {
-      products = products.filter((p) => p.isSold === args.isSold);
+    // Use indexes to avoid full table scans + large payloads.
+    let products;
+    if (args.category && args.isSold !== undefined) {
+      products = await ctx.db
+        .query("products")
+        .withIndex("by_category_and_isSold", (q) =>
+          q.eq("category", args.category!).eq("isSold", args.isSold!),
+        )
+        .order("desc")
+        .collect();
+    } else if (args.category) {
+      products = await ctx.db
+        .query("products")
+        .withIndex("by_category", (q) => q.eq("category", args.category!))
+        .order("desc")
+        .collect();
+      if (args.isSold !== undefined) {
+        products = products.filter((p) => p.isSold === args.isSold);
+      }
+    } else if (args.isSold !== undefined) {
+      products = await ctx.db
+        .query("products")
+        .withIndex("by_isSold", (q) => q.eq("isSold", args.isSold!))
+        .order("desc")
+        .collect();
+    } else {
+      products = await ctx.db.query("products").order("desc").collect();
     }
 
     return products.map((p) => {
@@ -86,8 +105,7 @@ export const getProductsBySeries = query({
   handler: async (ctx, args) => {
     const products = await ctx.db
       .query("products")
-      .withIndex("by_series")
-      .filter((q) => q.eq(q.field("seriesId"), args.seriesId))
+      .withIndex("by_series", (q) => q.eq("seriesId", args.seriesId))
       .collect();
     return products.map((p) => {
       const { merchSubcategoryId: _id, ...rest } = p;
@@ -148,7 +166,7 @@ export const deleteProduct = mutation({
   args: { id: v.id("products") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const product = await ctx.db.get(args.id);
+    const product = await ctx.db.get("products", args.id);
     if (product) {
       for (const image of product.images) {
         if (!image.startsWith("http")) {
@@ -156,7 +174,7 @@ export const deleteProduct = mutation({
         }
       }
     }
-    await ctx.db.delete(args.id);
+    await ctx.db.delete("products", args.id);
     return null;
   },
 });

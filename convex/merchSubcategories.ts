@@ -39,8 +39,7 @@ export const createMerchSubcategory = mutation({
 
     const existing = await ctx.db
       .query("merchSubcategories")
-      .withIndex("by_slug")
-      .filter((q) => q.eq(q.field("slug"), normalizedSlug))
+      .withIndex("by_slug", (q) => q.eq("slug", normalizedSlug))
       .unique();
 
     if (existing) {
@@ -73,7 +72,7 @@ export const updateMerchSubcategoryOrder = mutation({
     for (let i = 0; i < args.orderedIds.length; i++) {
       const id = args.orderedIds[i];
       if (!id) continue;
-      await ctx.db.patch(id, { order: i });
+      await ctx.db.patch("merchSubcategories", id, { order: i });
     }
     return null;
   },
@@ -85,7 +84,7 @@ export const deleteMerchSubcategory = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const subcategory = await ctx.db.get(args.id);
+    const subcategory = await ctx.db.get("merchSubcategories", args.id);
     if (!subcategory) {
       return null;
     }
@@ -97,11 +96,13 @@ export const deleteMerchSubcategory = mutation({
 
     for (const product of products) {
       if (product.merchSubcategorySlug === subcategory.slug) {
-        await ctx.db.patch(product._id, { merchSubcategorySlug: undefined });
+        await ctx.db.patch("products", product._id, {
+          merchSubcategorySlug: undefined,
+        });
       }
     }
 
-    await ctx.db.delete(args.id);
+    await ctx.db.delete("merchSubcategories", args.id);
     return null;
   },
 });
@@ -128,21 +129,19 @@ export const listMerchProductsBySubcategory = query({
   handler: async (ctx, args) => {
     const products = await ctx.db
       .query("products")
-      .withIndex("by_category", (q) => q.eq("category", "merch"))
+      .withIndex("by_category_and_merchSubcategorySlug", (q) =>
+        q.eq("category", "merch").eq("merchSubcategorySlug", args.subcategorySlug),
+      )
+      .order("desc")
       .collect();
 
-    return products
-      .filter(
-        (product) =>
-          resolveMerchSubcategorySlug(ctx, product) === args.subcategorySlug,
-      )
-      .map((p) => {
-        const { merchSubcategoryId: _id, ...rest } = p;
-        return {
-          ...rest,
-          merchSubcategorySlug: resolveMerchSubcategorySlug(ctx, p),
-        };
-      });
+    return products.map((p) => {
+      const { merchSubcategoryId: _id, ...rest } = p;
+      return {
+        ...rest,
+        merchSubcategorySlug: resolveMerchSubcategorySlug(ctx, p),
+      };
+    });
   },
 });
 

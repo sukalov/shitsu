@@ -16,27 +16,29 @@ export function AdminLogin() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    try {
-      if (!adminExists) {
-        await setupAdmin({ password });
+    void (async () => {
+      try {
+        if (!adminExists) {
+          await setupAdmin({ password });
+        }
+        const result = await login({ password });
+        if (result.success && result.token) {
+          setAuth(result.token);
+          void navigate("/admin/products");
+        } else {
+          setError("Неверный пароль");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Произошла ошибка");
+      } finally {
+        setIsLoading(false);
       }
-      const result = await login({ password });
-      if (result.success && result.token) {
-        setAuth(result.token);
-        void navigate("/admin/products");
-      } else {
-        setError("Неверный пароль");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Произошла ошибка");
-    } finally {
-      setIsLoading(false);
-    }
+    })();
   };
 
   if (adminExists === undefined) {

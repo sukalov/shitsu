@@ -22,8 +22,8 @@ export const setupAdmin = mutation({
   args: { password: v.string() },
   returns: v.boolean(),
   handler: async (ctx, args) => {
-    const existingAdmins = await ctx.db.query("admins").collect();
-    if (existingAdmins.length > 0) {
+    const existingAdmin = await ctx.db.query("admins").order("desc").first();
+    if (existingAdmin) {
       throw new Error("Admin already exists. Use login to authenticate.");
     }
 
@@ -43,12 +43,11 @@ export const login = mutation({
     token: v.optional(v.string()),
   }),
   handler: async (ctx, args) => {
-    const admins = await ctx.db.query("admins").collect();
-    if (admins.length === 0) {
+    const admin = await ctx.db.query("admins").order("desc").first();
+    if (!admin) {
       return { success: false };
     }
 
-    const admin = admins[0];
     const isValid = await verifyPassword(args.password, admin.passwordHash);
 
     if (isValid) {
@@ -64,12 +63,11 @@ export const changePassword = mutation({
   args: { currentPassword: v.string(), newPassword: v.string() },
   returns: v.boolean(),
   handler: async (ctx, args) => {
-    const admins = await ctx.db.query("admins").collect();
-    if (admins.length === 0) {
+    const admin = await ctx.db.query("admins").order("desc").first();
+    if (!admin) {
       throw new Error("No admin exists. Run setup first.");
     }
 
-    const admin = admins[0];
     const isValid = await verifyPassword(
       args.currentPassword,
       admin.passwordHash,
@@ -89,7 +87,7 @@ export const checkAdminExists = query({
   args: {},
   returns: v.boolean(),
   handler: async (ctx) => {
-    const admins = await ctx.db.query("admins").collect();
-    return admins.length > 0;
+    const admin = await ctx.db.query("admins").order("desc").first();
+    return !!admin;
   },
 });

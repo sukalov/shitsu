@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router";
 import { ArrowLeft, ShoppingBag } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { ProductDetailSkeleton } from "@/components/loading-states";
-import { useProduct, useProducts } from "@/lib/hooks";
+import { useProduct, useProducts, useProductsBySeries } from "@/lib/hooks";
 import { useCart } from "@/lib/cart";
 import { getImageUrl, cn } from "@/lib/utils";
 import { SEO } from "@/components/SEO";
@@ -52,7 +52,8 @@ function VariantCard({
 export function ProductPage() {
   const { id } = useParams();
   const product = useProduct(id);
-  const allProducts = useProducts(undefined, false);
+  const seriesProducts = useProductsBySeries(product?.seriesId ?? "");
+  const categoryProducts = useProducts(product?.category, false);
   const { addItem } = useCart();
   const [currentImage, setCurrentImage] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -77,13 +78,12 @@ export function ProductPage() {
     );
   }
 
-  const seriesProducts = product.seriesId
-    ? (allProducts ?? []).filter(
-        (p) => p.seriesId === product.seriesId && p._id !== product._id,
-      )
-    : [];
+  const seriesVariants =
+    product.seriesId && seriesProducts
+      ? seriesProducts.filter((p) => p._id !== product._id)
+      : [];
 
-  const relatedProducts = (allProducts ?? []).filter(
+  const relatedProducts = (categoryProducts ?? []).filter(
     (p) =>
       p.category === product.category &&
       p._id !== product._id &&
@@ -207,13 +207,13 @@ export function ProductPage() {
                 </p>
               </div>
 
-              {seriesProducts.length > 0 && (
+              {seriesVariants.length > 0 && (
                 <div className="py-6 border-y border-neutral-200">
                   <h3 className="text-xs text-neutral-500 mb-4 uppercase tracking-[0.15em]">
                     варианты
                   </h3>
                   <div className="flex gap-4 overflow-x-auto pb-2">
-                    {seriesProducts.map((variant) => (
+                    {seriesVariants.map((variant) => (
                       <VariantCard key={variant._id} product={variant} />
                     ))}
                   </div>

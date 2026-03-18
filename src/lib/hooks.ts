@@ -56,7 +56,10 @@ export function useProduct(id: string | undefined) {
 }
 
 export function useProductsBySeries(seriesId: string) {
-  return useQuery(api.products.getProductsBySeries, { seriesId });
+  return useQuery(
+    api.products.getProductsBySeries,
+    seriesId ? { seriesId } : "skip",
+  );
 }
 
 export function useAllSeries() {
