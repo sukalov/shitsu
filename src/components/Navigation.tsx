@@ -1,24 +1,26 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router";
-import { ShoppingBag, List, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useCartBadge } from "@/lib/cart";
+import { useMerchSubcategories } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import { List, ShoppingBag, X } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router";
 
 const menuItems = [
   { label: "Оригиналы", href: "/originals" },
-  { label: "Мерч", href: "/merch" },
+  { label: "Мерч", href: "/merch", id: "merch" as const },
   { label: "Индивидуальный", href: "/custom" },
   { label: "Архив", href: "/archive" },
   { label: "О себе", href: "/about" },
   { label: "Контакты", href: "/contacts" },
-];
+] as const;
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { count, setIsOpen } = useCartBadge();
   const location = useLocation();
+  const merchSubcategories = useMerchSubcategories();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,20 +56,69 @@ export function Navigation() {
             </Link>
 
             <div className="hidden lg:flex items-center gap-10">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={cn(
-                    "relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 elegant-underline",
-                    location.pathname === item.href
-                      ? "text-neutral-900"
-                      : "text-neutral-500 hover:text-neutral-900",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {menuItems.map((item) => {
+                const isMerch = item.id === "merch";
+
+                if (!isMerch) {
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={cn(
+                        "relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 elegant-underline",
+                        location.pathname === item.href
+                          ? "text-neutral-900"
+                          : "text-neutral-500 hover:text-neutral-900",
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+
+                const isActive =
+                  location.pathname === "/merch" ||
+                  (location.pathname === "/merch" &&
+                    new URLSearchParams(location.search).has("subcategory"));
+
+                return (
+                  <div key={item.href} className="relative group">
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 elegant-underline",
+                        isActive
+                          ? "text-neutral-900"
+                          : "text-neutral-500 hover:text-neutral-900",
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                    {merchSubcategories && merchSubcategories.length > 0 && (
+                      <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200 absolute left-1/2 -translate-x-1/2 top-full min-w-[220px] bg-white shadow-lg border border-neutral-200 py-2 z-50">
+                        <Link
+                          to="/merch"
+                          className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50"
+                        >
+                          Весь мерч
+                        </Link>
+                        <div className="border-t border-neutral-100 my-1" />
+                        {merchSubcategories.map((subcategory) => (
+                          <Link
+                            key={subcategory._id}
+                            to={`/merch?subcategory=${encodeURIComponent(
+                              subcategory.slug,
+                            )}`}
+                            className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                          >
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex items-center gap-4">
@@ -107,21 +158,65 @@ export function Navigation() {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 bg-white pt-24">
           <div className="flex flex-col items-start justify-center h-full pl-12">
-            {menuItems.map((item, idx) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                className={cn(
-                  "text-3xl py-4 transition-all duration-500",
-                  location.pathname === item.href
-                    ? "text-neutral-900"
-                    : "text-neutral-400 hover:text-neutral-900",
-                )}
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {menuItems.map((item, idx) => {
+              const isMerch = item.id === "merch";
+
+              if (!isMerch) {
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      "text-3xl py-4 transition-all duration-500",
+                      location.pathname === item.href
+                        ? "text-neutral-900"
+                        : "text-neutral-400 hover:text-neutral-900",
+                    )}
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={item.href} className="py-4">
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "block text-3xl mb-2 transition-all duration-500",
+                      location.pathname === item.href
+                        ? "text-neutral-900"
+                        : "text-neutral-400 hover:text-neutral-900",
+                    )}
+                    style={{ animationDelay: `${idx * 100}ms` }}
+                  >
+                    {item.label}
+                  </Link>
+                  {merchSubcategories && merchSubcategories.length > 0 && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      <Link
+                        to="/merch"
+                        className="block text-sm text-neutral-400 hover:text-neutral-900"
+                      >
+                        Весь мерч
+                      </Link>
+                      {merchSubcategories.map((subcategory) => (
+                        <Link
+                          key={subcategory._id}
+                          to={`/merch?subcategory=${encodeURIComponent(
+                            subcategory.slug,
+                          )}`}
+                          className="block text-sm text-neutral-500 hover:text-neutral-900"
+                        >
+                          {subcategory.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

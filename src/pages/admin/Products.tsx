@@ -17,6 +17,7 @@ import {
   useDeleteProduct,
   useGenerateUploadUrl,
   useDeleteImage,
+  useMerchSubcategories,
 } from "@/lib/hooks";
 import type { Product, Category } from "@/lib/types";
 import { Id } from "../../../convex/_generated/dataModel";
@@ -39,6 +40,7 @@ interface ProductFormData {
   description: string;
   isSold: boolean;
   seriesId: string;
+  merchSubcategorySlug: string;
 }
 
 const emptyForm: ProductFormData = {
@@ -49,6 +51,7 @@ const emptyForm: ProductFormData = {
   description: "",
   isSold: false,
   seriesId: "",
+  merchSubcategorySlug: "",
 };
 
 const PRODUCT_PAGE_IMAGE_RATIO = 4 / 5;
@@ -56,6 +59,7 @@ const IMAGE_RATIO_TOLERANCE = 0.01;
 
 export function AdminProducts() {
   const products = useProducts();
+  const merchSubcategories = useMerchSubcategories();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -161,6 +165,7 @@ export function AdminProducts() {
       description: product.description,
       isSold: product.isSold,
       seriesId: product.seriesId || "",
+      merchSubcategorySlug: product.merchSubcategorySlug || "",
     });
     setIsEditing(true);
   };
@@ -191,6 +196,7 @@ export function AdminProducts() {
         description: formData.description,
         isSold: formData.isSold,
         seriesId: formData.seriesId || undefined,
+        merchSubcategorySlug: formData.merchSubcategorySlug || undefined,
       };
 
       if (editingProduct) {
@@ -324,6 +330,36 @@ export function AdminProducts() {
                 <SelectItem value="merch">Мерч</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="merchSubcategory">Подкатегория (для мерча)</Label>
+            <Select
+              value={formData.merchSubcategorySlug}
+              onValueChange={(value) =>
+                setFormData({ ...formData, merchSubcategorySlug: value })
+              }
+              disabled={
+                formData.category !== "merch" || !merchSubcategories?.length
+              }
+            >
+              <SelectTrigger id="merchSubcategory">
+                <SelectValue placeholder="Без подкатегории" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Без подкатегории</SelectItem>
+                {merchSubcategories?.map((subcategory) => (
+                  <SelectItem key={subcategory._id} value={subcategory.slug}>
+                    {subcategory.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {formData.category !== "merch" && (
+              <p className="text-xs text-neutral-500">
+                Подкатегория применяется только к товарам категории &quot;Мерч&quot;.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -556,7 +592,16 @@ export function AdminProducts() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                    {product.category === "originals" ? "Оригиналы" : "Мерч"}
+                    {product.category === "originals"
+                      ? "Оригиналы"
+                      : (() => {
+                          const subcategory = merchSubcategories?.find(
+                            (s) => s.slug === product.merchSubcategorySlug,
+                          );
+                          return subcategory
+                            ? `Мерч (${subcategory.name})`
+                            : "Мерч";
+                        })()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     {product.price.toLocaleString("ru-RU")} ₽

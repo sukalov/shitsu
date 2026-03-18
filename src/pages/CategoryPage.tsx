@@ -1,5 +1,6 @@
-import { useProducts } from "@/lib/hooks";
+import { useProducts, useMerchProductsBySubcategory } from "@/lib/hooks";
 import type { Category } from "@/lib/types";
+import { useLocation } from "react-router";
 import { ProductGridSkeleton } from "@/components/loading-states";
 import { ProductCard } from "@/components/ProductCard";
 import { HeaderImage } from "@/components/HeaderImage";
@@ -12,9 +13,17 @@ interface CategoryPageProps {
 }
 
 export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
-  const products = useProducts(category as Category, isSold ?? false);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const subcategorySlug =
+    category === "merch" ? searchParams.get("subcategory") : null;
 
-  if (!products) {
+  const baseProducts = useProducts(category as Category, isSold ?? false);
+  const merchSubcategoryProducts = useMerchProductsBySubcategory(
+    subcategorySlug,
+  );
+
+  if (!baseProducts || (subcategorySlug && !merchSubcategoryProducts)) {
     return (
       <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
@@ -27,7 +36,10 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
     );
   }
 
-  const categoryProducts = products;
+  const categoryProducts =
+    category === "merch" && subcategorySlug && merchSubcategoryProducts
+      ? merchSubcategoryProducts
+      : baseProducts;
 
   const seoPage =
     category === "originals"

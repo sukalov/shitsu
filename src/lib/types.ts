@@ -19,6 +19,15 @@ export interface Product {
   description: string;
   isSold: boolean;
   seriesId?: string;
+  merchSubcategorySlug?: string | null;
+}
+
+export interface MerchSubcategory {
+  _id: Id<"merchSubcategories">;
+  _creationTime: number;
+  name: string;
+  slug: string;
+  createdAt: number;
 }
 
 export interface CartItem {

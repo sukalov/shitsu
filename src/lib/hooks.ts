@@ -41,6 +41,13 @@ export function useProducts(category?: Category, isSold?: boolean) {
   return useQuery(api.products.listProducts, { category, isSold });
 }
 
+export function useMerchProductsBySubcategory(subcategorySlug: string | null) {
+  return useQuery(
+    api.merchSubcategories.listMerchProductsBySubcategory,
+    subcategorySlug ? { subcategorySlug } : "skip",
+  );
+}
+
 export function useProduct(id: string | undefined) {
   return useQuery(
     api.products.getProduct,
@@ -74,6 +81,19 @@ export function useGenerateUploadUrl() {
 
 export function useDeleteImage() {
   return useMutation(api.products.deleteImage);
+}
+
+// Merch subcategories
+export function useMerchSubcategories() {
+  return useQuery(api.merchSubcategories.listMerchSubcategories, {});
+}
+
+export function useCreateMerchSubcategory() {
+  return useMutation(api.merchSubcategories.createMerchSubcategory);
+}
+
+export function useDeleteMerchSubcategory() {
+  return useMutation(api.merchSubcategories.deleteMerchSubcategory);
 }
 
 // Orders

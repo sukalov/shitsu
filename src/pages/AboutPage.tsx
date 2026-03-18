@@ -38,33 +38,12 @@ export function AboutPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const stickerProgress = Math.min(1, Math.max(0, (scrollY - 0.25) * 1.5));
-  const stickerY = 150 - stickerProgress * 150;
-  const stickerRotate = -15 + stickerProgress * 15;
-  const stickerScale = 0.8 + stickerProgress * 0.2;
-
   return (
-    <div ref={sectionRef} className="min-h-screen pt-24 pb-20 bg-white relative overflow-hidden">
+    <div
+      ref={sectionRef}
+      className="min-h-screen pt-24 pb-20 bg-white relative overflow-hidden"
+    >
       <SEO page="about" />
-
-      <div
-        className="fixed right-[-30%] bottom-[0%] z-30 pointer-events-none md:hidden"
-        style={{
-          transform: `translateY(${stickerY}%) rotate(${stickerRotate}deg) scale(${stickerScale})`,
-          transition: "none",
-          width: "clamp(280px, 80vw, 380px)",
-          opacity: stickerProgress > 0 ? 1 : 0,
-        }}
-      >
-        <img
-          src="./artist.png"
-          alt="Художница Кира (SHITSU) — Москва, Россия"
-          className="w-full h-auto drop-shadow-2xl"
-          style={{
-            filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.25))",
-          }}
-        />
-      </div>
 
       <div className="max-w-[800px] mx-auto px-6 lg:px-8 relative z-20">
         <div className="relative w-full mb-4">

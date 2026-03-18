@@ -1,6 +1,15 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
+
+export function resolveMerchSubcategorySlug(
+  _ctx: QueryCtx,
+  p: Doc<"products">,
+): string | undefined {
+  return p.merchSubcategorySlug ?? undefined;
+}
 
 export const listProducts = query({
   args: {
@@ -18,6 +27,7 @@ export const listProducts = query({
       description: v.string(),
       isSold: v.boolean(),
       seriesId: v.optional(v.string()),
+      merchSubcategorySlug: v.optional(v.string()),
       createdAt: v.number(),
     }),
   ),
@@ -32,7 +42,13 @@ export const listProducts = query({
       products = products.filter((p) => p.isSold === args.isSold);
     }
 
-    return products;
+    return products.map((p) => {
+      const { merchSubcategoryId: _id, ...rest } = p;
+      return {
+        ...rest,
+        merchSubcategorySlug: resolveMerchSubcategorySlug(ctx, p),
+      };
+    });
   },
 });
 
@@ -40,7 +56,13 @@ export const getProduct = query({
   args: { id: v.id("products") },
   returns: v.any(),
   handler: async (ctx, args) => {
-    return await ctx.db.get("products", args.id);
+    const p = await ctx.db.get("products", args.id);
+    if (!p) return null;
+    const { merchSubcategoryId: _id, ...rest } = p;
+    return {
+      ...rest,
+      merchSubcategorySlug: resolveMerchSubcategorySlug(ctx, p),
+    };
   },
 });
 
@@ -57,15 +79,23 @@ export const getProductsBySeries = query({
       description: v.string(),
       isSold: v.boolean(),
       seriesId: v.optional(v.string()),
+      merchSubcategorySlug: v.optional(v.string()),
       createdAt: v.number(),
     }),
   ),
   handler: async (ctx, args) => {
-    return await ctx.db
+    const products = await ctx.db
       .query("products")
       .withIndex("by_series")
       .filter((q) => q.eq(q.field("seriesId"), args.seriesId))
       .collect();
+    return products.map((p) => {
+      const { merchSubcategoryId: _id, ...rest } = p;
+      return {
+        ...rest,
+        merchSubcategorySlug: resolveMerchSubcategorySlug(ctx, p),
+      };
+    });
   },
 });
 
@@ -78,6 +108,7 @@ export const createProduct = mutation({
     description: v.string(),
     isSold: v.boolean(),
     seriesId: v.optional(v.string()),
+    merchSubcategorySlug: v.optional(v.string()),
   },
   returns: v.id("products"),
   handler: async (ctx, args) => {
@@ -99,11 +130,16 @@ export const updateProduct = mutation({
     description: v.optional(v.string()),
     isSold: v.optional(v.boolean()),
     seriesId: v.optional(v.string()),
+    merchSubcategorySlug: v.optional(v.string()),
   },
   returns: v.id("products"),
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
-    await ctx.db.patch("products", id, updates);
+    // Clear legacy field so we use slug only
+    await ctx.db.patch("products", id, {
+      ...updates,
+      merchSubcategoryId: undefined,
+    });
     return id;
   },
 });

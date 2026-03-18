@@ -13,10 +13,21 @@ export default defineSchema({
     description: v.string(),
     isSold: v.boolean(),
     seriesId: v.optional(v.string()),
+    merchSubcategorySlug: v.optional(v.string()),
+    // Legacy: kept optional so existing docs validate; clear when updating (use slug only)
+    merchSubcategoryId: v.optional(v.id("merchSubcategories")),
     createdAt: v.number(),
   })
     .index("by_category", ["category"])
     .index("by_series", ["seriesId"])
+    .index("by_created", ["createdAt"]),
+
+  merchSubcategories: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_slug", ["slug"])
     .index("by_created", ["createdAt"]),
 
   orders: defineTable({

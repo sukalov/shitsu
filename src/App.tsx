@@ -34,6 +34,11 @@ const AdminLogin = lazy(() =>
 const AdminProducts = lazy(() =>
   import("@/pages/admin/Products").then((m) => ({ default: m.AdminProducts })),
 );
+const AdminMerchSubcategories = lazy(() =>
+  import("@/pages/admin/MerchSubcategories").then((m) => ({
+    default: m.AdminMerchSubcategories,
+  })),
+);
 const AdminSettings = lazy(() =>
   import("@/pages/admin/Settings").then((m) => ({ default: m.AdminSettings })),
 );
@@ -133,6 +138,14 @@ function AdminRoutes() {
         element={
           <ProtectedAdminRoute>
             <AdminProducts />
+          </ProtectedAdminRoute>
+        }
+      />
+      <Route
+        path="/merch-subcategories"
+        element={
+          <ProtectedAdminRoute>
+            <AdminMerchSubcategories />
           </ProtectedAdminRoute>
         }
       />

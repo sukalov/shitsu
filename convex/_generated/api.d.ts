@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as http from "../http.js";
+import type * as merchSubcategories from "../merchSubcategories.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
   http: typeof http;
+  merchSubcategories: typeof merchSubcategories;
   orders: typeof orders;
   products: typeof products;
 }>;
