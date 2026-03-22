@@ -21,7 +21,7 @@ export function Navigation() {
   const { count, setIsOpen } = useCartBadge();
   const location = useLocation();
   const merchSubcategories = useMerchSubcategories();
-  const isFirstPathnameEffect = useRef(true);
+  const isFirstLocationEffect = useRef(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,18 +31,18 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu when the route changes. Defer setState (eslint) and skip the
-  // first run so opening the menu does not re-trigger via isMenuOpen in deps.
+  // Close mobile menu when the URL changes (pathname or query — e.g. /merch?subcategory=).
+  // Defer setState (eslint) and skip the first run so toggling open does not close immediately.
   useEffect(() => {
-    if (isFirstPathnameEffect.current) {
-      isFirstPathnameEffect.current = false;
+    if (isFirstLocationEffect.current) {
+      isFirstLocationEffect.current = false;
       return;
     }
     const id = window.setTimeout(() => {
       setIsMenuOpen(false);
     }, 0);
     return () => window.clearTimeout(id);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   return (
     <>
@@ -165,67 +165,81 @@ export function Navigation() {
       </header>
 
       {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white pt-24">
-          <div className="flex flex-col items-start justify-center h-full pl-12">
-            {menuItems.map((item, idx) => {
-              const isMerch = item.href === "/merch";
+        <div
+          className="fixed inset-0 z-40 flex flex-col bg-white/98 backdrop-blur-md lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Навигация"
+        >
+          {/* Spacer for fixed header (logo + actions stay above at z-50) */}
+          <div
+            className="shrink-0"
+            style={{
+              height: "max(5.5rem, calc(3.5rem + env(safe-area-inset-top, 0px)))",
+            }}
+          />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-8">
+            <nav className="mx-auto flex w-full max-w-md flex-col gap-0.5">
+              {menuItems.map((item, idx) => {
+                const isMerch = item.href === "/merch";
 
-              if (!isMerch) {
+                if (!isMerch) {
+                  return (
+                    <Link
+                      key={item.href}
+                      to={item.href}
+                      className={cn(
+                        "block rounded-2xl px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] transition-colors duration-300 sm:py-2.5",
+                        location.pathname === item.href
+                          ? "bg-neutral-100 text-neutral-900"
+                          : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 active:bg-neutral-100",
+                      )}
+                      style={{ animationDelay: `${idx * 40}ms` }}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                }
+
                 return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    className={cn(
-                      "text-3xl py-4 transition-all duration-500",
-                      location.pathname === item.href
-                        ? "text-neutral-900"
-                        : "text-neutral-400 hover:text-neutral-900",
-                    )}
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              }
-
-              return (
-                <div key={item.href} className="py-4">
-                  <Link
-                    to={item.href}
-                    className={cn(
-                      "block text-3xl mb-2 transition-all duration-500",
-                      location.pathname === item.href
-                        ? "text-neutral-900"
-                        : "text-neutral-400 hover:text-neutral-900",
-                    )}
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    {item.label}
-                  </Link>
-                  {merchSubcategories && merchSubcategories.length > 0 && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      <Link
-                        to="/merch"
-                        className="block text-sm text-neutral-400 hover:text-neutral-900"
-                      >
-                        Весь мерч
-                      </Link>
-                      {merchSubcategories.map((subcategory) => (
+                  <div key={item.href} className="py-0.5">
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "block rounded-2xl px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] transition-colors duration-300 sm:py-2.5",
+                        location.pathname === item.href
+                          ? "bg-neutral-100 text-neutral-900"
+                          : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 active:bg-neutral-100",
+                      )}
+                      style={{ animationDelay: `${idx * 40}ms` }}
+                    >
+                      {item.label}
+                    </Link>
+                    {merchSubcategories && merchSubcategories.length > 0 && (
+                      <div className="mt-1.5 ml-1 space-y-0.5 border-l border-neutral-200 pl-4">
                         <Link
-                          key={subcategory._id}
-                          to={`/merch?subcategory=${encodeURIComponent(
-                            subcategory.slug,
-                          )}`}
-                          className="block text-sm text-neutral-500 hover:text-neutral-900"
+                          to="/merch"
+                          className="block rounded-lg py-2 pr-2 text-[11px] uppercase tracking-[0.16em] text-neutral-400 transition-colors hover:text-neutral-900"
                         >
-                          {subcategory.name}
+                          Весь мерч
                         </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                        {merchSubcategories.map((subcategory) => (
+                          <Link
+                            key={subcategory._id}
+                            to={`/merch?subcategory=${encodeURIComponent(
+                              subcategory.slug,
+                            )}`}
+                            className="block rounded-lg py-2 pr-2 text-[11px] uppercase tracking-[0.16em] text-neutral-500 transition-colors hover:text-neutral-900"
+                          >
+                            {subcategory.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
           </div>
         </div>
       )}
