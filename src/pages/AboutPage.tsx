@@ -48,7 +48,7 @@ export function AboutPage() {
       <div className="max-w-[800px] mx-auto px-6 lg:px-8 relative z-20">
         <div className="relative w-full mb-4">
           <img
-            src="/about-background.png"
+            src="/about-background.webp"
             alt="Обо мне"
             className="w-full h-auto object-cover"
           />
