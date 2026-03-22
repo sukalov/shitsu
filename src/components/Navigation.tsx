@@ -3,7 +3,7 @@ import { useCartBadge } from "@/lib/cart";
 import { useMerchSubcategories } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { List, ShoppingBag, X } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 const menuItems = [
@@ -21,6 +21,7 @@ export function Navigation() {
   const { count, setIsOpen } = useCartBadge();
   const location = useLocation();
   const merchSubcategories = useMerchSubcategories();
+  const isFirstPathnameEffect = useRef(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,14 +31,18 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change (avoid sync setState in effect)
+  // Close mobile menu when the route changes. Defer setState (eslint) and skip the
+  // first run so opening the menu does not re-trigger via isMenuOpen in deps.
   useEffect(() => {
-    if (!isMenuOpen) return;
+    if (isFirstPathnameEffect.current) {
+      isFirstPathnameEffect.current = false;
+      return;
+    }
     const id = window.setTimeout(() => {
       setIsMenuOpen(false);
     }, 0);
     return () => window.clearTimeout(id);
-  }, [location.pathname, isMenuOpen]);
+  }, [location.pathname]);
 
   return (
     <>
