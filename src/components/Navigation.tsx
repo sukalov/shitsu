@@ -17,11 +17,13 @@ const menuItems = [
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [merchMenuOpen, setMerchMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { count, setIsOpen } = useCartBadge();
   const location = useLocation();
   const merchSubcategories = useMerchSubcategories();
   const isFirstLocationEffect = useRef(true);
+  const merchDesktopRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,6 +75,34 @@ export function Navigation() {
     return () => window.clearTimeout(id);
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setMerchMenuOpen(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!merchMenuOpen) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      const el = merchDesktopRef.current;
+      if (!el?.contains(event.target as Node)) {
+        setMerchMenuOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    return () => document.removeEventListener("pointerdown", handlePointerDown, true);
+  }, [merchMenuOpen]);
+
+  useEffect(() => {
+    if (!merchMenuOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMerchMenuOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [merchMenuOpen]);
+
   return (
     <>
       <header
@@ -114,46 +144,82 @@ export function Navigation() {
                   );
                 }
 
-                const isActive =
-                  location.pathname === "/merch" ||
-                  (location.pathname === "/merch" &&
-                    new URLSearchParams(location.search).has("subcategory"));
+                const isMerchActive = location.pathname === "/merch";
 
                 return (
-                  <div key={item.href} className="relative group">
-                    <Link
-                      to={item.href}
+                  <div
+                    key={item.href}
+                    ref={merchDesktopRef}
+                    className="relative"
+                    onMouseEnter={() => {
+                      if (window.matchMedia("(hover: hover)").matches) {
+                        setMerchMenuOpen(true);
+                      }
+                    }}
+                    onMouseLeave={() => {
+                      if (window.matchMedia("(hover: hover)").matches) {
+                        setMerchMenuOpen(false);
+                      }
+                    }}
+                  >
+                    <button
+                      type="button"
                       className={cn(
-                        "relative text-xs tracking-[0.2em] uppercase transition-colors duration-300 elegant-underline",
-                        isActive
+                        "relative cursor-pointer border-0 bg-transparent p-0 text-xs font-inherit tracking-[0.2em] uppercase transition-colors duration-300 elegant-underline",
+                        isMerchActive
                           ? "text-neutral-900"
                           : "text-neutral-500 hover:text-neutral-900",
                       )}
+                      aria-expanded={merchMenuOpen}
+                      aria-haspopup="menu"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!window.matchMedia("(hover: hover)").matches) {
+                          setMerchMenuOpen((open) => !open);
+                        }
+                      }}
                     >
                       {item.label}
-                    </Link>
-                    {merchSubcategories && merchSubcategories.length > 0 && (
-                      <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-200 absolute left-1/2 -translate-x-1/2 top-full min-w-[220px] bg-white shadow-lg border border-neutral-200 py-2 z-50">
+                    </button>
+                    <div className="absolute top-full left-1/2 z-50 -translate-x-1/2 pt-2">
+                      <div
+                        className={cn(
+                          "min-w-[220px] border border-neutral-200 bg-white py-2 shadow-lg transition-opacity duration-200",
+                          merchMenuOpen
+                            ? "visible opacity-100"
+                            : "invisible pointer-events-none opacity-0",
+                        )}
+                        role="menu"
+                        aria-label="Подкатегории мерча"
+                      >
                         <Link
                           to="/merch"
-                          className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-400 hover:text-neutral-900 hover:bg-neutral-50"
+                          role="menuitem"
+                          className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-400 hover:bg-neutral-50 hover:text-neutral-900"
+                          onClick={() => setMerchMenuOpen(false)}
                         >
                           Весь мерч
                         </Link>
-                        <div className="border-t border-neutral-100 my-1" />
-                        {merchSubcategories.map((subcategory) => (
-                          <Link
-                            key={subcategory._id}
-                            to={`/merch?subcategory=${encodeURIComponent(
-                              subcategory.slug,
-                            )}`}
-                            className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
-                          >
-                            {subcategory.name}
-                          </Link>
-                        ))}
+                        {merchSubcategories && merchSubcategories.length > 0 && (
+                          <>
+                            <div className="my-1 border-t border-neutral-100" />
+                            {merchSubcategories.map((subcategory) => (
+                              <Link
+                                key={subcategory._id}
+                                role="menuitem"
+                                to={`/merch?subcategory=${encodeURIComponent(
+                                  subcategory.slug,
+                                )}`}
+                                className="block px-4 py-2 text-[11px] tracking-[0.16em] uppercase text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                                onClick={() => setMerchMenuOpen(false)}
+                              >
+                                {subcategory.name}
+                              </Link>
+                            ))}
+                          </>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 );
               })}
@@ -232,18 +298,17 @@ export function Navigation() {
 
                 return (
                   <div key={item.href} className="py-0.5">
-                    <Link
-                      to={item.href}
+                    <div
                       className={cn(
-                        "block rounded-2xl px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] transition-colors duration-300 sm:py-2.5",
-                        location.pathname === item.href
+                        "block rounded-2xl px-3 py-3 text-sm font-medium uppercase tracking-[0.2em] transition-colors duration-300 select-none sm:py-2.5",
+                        location.pathname === "/merch"
                           ? "bg-neutral-100 text-neutral-900"
-                          : "text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 active:bg-neutral-100",
+                          : "text-neutral-500",
                       )}
                       style={{ animationDelay: `${idx * 40}ms` }}
                     >
                       {item.label}
-                    </Link>
+                    </div>
                     {merchSubcategories && merchSubcategories.length > 0 && (
                       <div className="mt-1.5 ml-1 space-y-0.5 border-l border-neutral-200 pl-4">
                         <Link
