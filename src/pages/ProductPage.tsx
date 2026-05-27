@@ -2,8 +2,10 @@ import { useState, useRef } from "react";
 import { Link, useParams } from "react-router";
 import { ArrowLeft, ShoppingBag } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProductDetailSkeleton } from "@/components/loading-states";
 import { useProduct, useProducts, useProductsBySeries } from "@/lib/hooks";
+import type { Product } from "@/lib/types";
 import { useCart } from "@/lib/cart";
 import { getImageUrl, cn } from "@/lib/utils";
 import { SEO } from "@/components/SEO";
@@ -52,13 +54,6 @@ function VariantCard({
 export function ProductPage() {
   const { id } = useParams();
   const product = useProduct(id);
-  const seriesProducts = useProductsBySeries(product?.seriesId ?? "");
-  const categoryProducts = useProducts(product?.category, false);
-  const { addItem } = useCart();
-  const [currentImage, setCurrentImage] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
-  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   if (product === undefined) {
     return (
@@ -71,12 +66,20 @@ export function ProductPage() {
   }
 
   if (!product) {
-    return (
-      <div className="min-h-screen pt-32 pb-20 px-6 lg:px-12 flex items-center justify-center">
-        <p className="text-xl text-neutral-400">Товар не найден</p>
-      </div>
-    );
+    return <NotFoundPage />;
   }
+
+  return <ProductPageContent product={product} />;
+}
+
+function ProductPageContent({ product }: { product: Product }) {
+  const seriesProducts = useProductsBySeries(product.seriesId ?? "");
+  const categoryProducts = useProducts(product.category, false);
+  const { addItem } = useCart();
+  const [currentImage, setCurrentImage] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   const seriesVariants =
     product.seriesId && seriesProducts

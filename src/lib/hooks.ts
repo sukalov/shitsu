@@ -49,10 +49,7 @@ export function useMerchProductsBySubcategory(subcategorySlug: string | null) {
 }
 
 export function useProduct(id: string | undefined) {
-  return useQuery(
-    api.products.getProduct,
-    id ? { id: id as Id<"products"> } : "skip",
-  );
+  return useQuery(api.products.getProduct, id ? { id } : "skip");
 }
 
 export function useProductsBySeries(seriesId: string) {

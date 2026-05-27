@@ -11,6 +11,20 @@ export function resolveMerchSubcategorySlug(
   return p.merchSubcategorySlug ?? undefined;
 }
 
+const productReturnValidator = v.object({
+  _id: v.id("products"),
+  _creationTime: v.number(),
+  name: v.string(),
+  price: v.number(),
+  category: v.union(v.literal("originals"), v.literal("merch")),
+  images: v.array(v.string()),
+  description: v.string(),
+  isSold: v.boolean(),
+  seriesId: v.optional(v.string()),
+  merchSubcategorySlug: v.optional(v.string()),
+  createdAt: v.number(),
+});
+
 export const listProducts = query({
   args: {
     category: v.optional(v.union(v.literal("originals"), v.literal("merch"))),
@@ -72,10 +86,13 @@ export const listProducts = query({
 });
 
 export const getProduct = query({
-  args: { id: v.id("products") },
-  returns: v.any(),
+  args: { id: v.string() },
+  returns: v.union(v.null(), productReturnValidator),
   handler: async (ctx, args) => {
-    const p = await ctx.db.get("products", args.id);
+    const productId = ctx.db.normalizeId("products", args.id);
+    if (!productId) return null;
+
+    const p = await ctx.db.get("products", productId);
     if (!p) return null;
     const { merchSubcategoryId: _id, ...rest } = p;
     return {

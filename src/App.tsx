@@ -5,8 +5,6 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { Navigation } from "@/components/Navigation";
 import { CartSidebar } from "@/components/CartSidebar";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-
 const HomePage = lazy(() =>
   import("@/pages/HomePage").then((m) => ({ default: m.HomePage })),
 );
@@ -27,6 +25,9 @@ const ContactsPage = lazy(() =>
 );
 const DeliveryPage = lazy(() =>
   import("@/pages/DeliveryPage").then((m) => ({ default: m.DeliveryPage })),
+);
+const NotFoundPage = lazy(() =>
+  import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
 );
 const AdminLogin = lazy(() =>
   import("@/pages/admin/Login").then((m) => ({ default: m.AdminLogin })),
@@ -94,31 +95,14 @@ function AdminIndex() {
 }
 
 function AdminNotFound() {
-  const navigate = useNavigate();
   const token = useAuth();
 
   if (!token) return <Navigate to="/admin/auth" replace />;
 
   return (
-    <Suspense fallback={<PageLoader />}>
-      <AdminLayout>
-        <div className="text-center py-20">
-          <h1 className="text-4xl uppercase tracking-widest mb-4">404</h1>
-          <p className="text-neutral-500 mb-8">Страница не найдена</p>
-          <div className="flex justify-center gap-4">
-            <Button onClick={() => void navigate("/")}>
-              Вернуться на сайт
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => void navigate("/admin/products")}
-            >
-              Админ-панель
-            </Button>
-          </div>
-        </div>
-      </AdminLayout>
-    </Suspense>
+    <SuspendedRoute>
+      <NotFoundPage />
+    </SuspendedRoute>
   );
 }
 
@@ -253,6 +237,14 @@ export default function App() {
             element={
               <SuspendedRoute>
                 <DeliveryPage />
+              </SuspendedRoute>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <SuspendedRoute>
+                <NotFoundPage />
               </SuspendedRoute>
             }
           />
