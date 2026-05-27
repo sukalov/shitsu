@@ -54,7 +54,7 @@ export function AboutPage() {
           />
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <HeaderImage
-              src="./headers/about.webp"
+              src="/headers/about.webp"
               alt="О СЕБЕ"
               className="w-full max-w-[400px] lg:max-w-[600px] h-14 lg:h-24 object-contain"
             />

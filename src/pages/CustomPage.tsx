@@ -31,7 +31,7 @@ export function CustomPage() {
       <div className="max-w-[1000px] mx-auto">
         <div className="text-center mb-20">
           <HeaderImage
-            src="./headers/custom-order.webp"
+            src="/headers/custom-order.webp"
             alt="Индивидуальный заказ"
             className="w-full h-16 lg:h-24 object-contain mx-auto mb-6 block"
           />

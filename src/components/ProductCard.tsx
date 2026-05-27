@@ -31,7 +31,7 @@ export function ProductCard({ product, featured = false }: ProductCardProps) {
           {product.isSold && (
             <div className="absolute bottom-0 inset-x-0 bg-white/40 backdrop-blur-sm px-3 py-4 shadow-lg">
               <img
-                src="./headers/sold.webp"
+                src="/headers/sold.webp"
                 alt="Картина продана"
                 className="h-24 w-full object-contain"
               />

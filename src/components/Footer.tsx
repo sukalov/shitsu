@@ -22,13 +22,13 @@ export function Footer() {
           <div className="flex flex-col items-center md:items-start gap-7">
             <Link to="/" className="group">
               <img
-                src="./logo.png"
+                src="/logo.png"
                 alt="SHITSU"
                 className="h-7 w-auto object-contain group-hover:opacity-70 transition-opacity"
               />
             </Link>
             <img
-              src="./headers/name.webp"
+              src="/headers/name.webp"
               alt=""
               className="h-7 -ml-0.5 w-auto object-contain"
             />

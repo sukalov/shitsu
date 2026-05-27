@@ -10,12 +10,12 @@ export function DeliveryPage() {
         <div className="text-center mb-12 md:mb-20">
           <div className="flex flex-col md:flex-row items-center justify-center gap-0 mb-4 md:mb-6">
             <HeaderImage
-              src="./headers/delivery.webp"
+              src="/headers/delivery.webp"
               alt="Доставка и оплата"
               className="h-[min(3.5rem,10vw)] lg:h-[min(5rem,6vw)] w-auto object-contain"
             />
             <HeaderImage
-              src="./headers/returns.webp"
+              src="/headers/returns.webp"
               alt="Возврат"
               className="h-[min(3.5rem,10vw)] lg:h-[min(5rem,6vw)] w-auto object-contain"
             />

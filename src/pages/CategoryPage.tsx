@@ -56,10 +56,10 @@ export function CategoryPage({ category, title, isSold }: CategoryPageProps) {
           <HeaderImage
             src={
               category === "originals"
-                ? "./headers/originals.webp"
+                ? "/headers/originals.webp"
                 : category === "merch"
-                  ? "./headers/merch.webp"
-                  : "./headers/archive.webp"
+                  ? "/headers/merch.webp"
+                  : "/headers/archive.webp"
             }
             alt={title}
             className="w-full h-14 lg:h-20 object-contain mx-auto mb-6"
